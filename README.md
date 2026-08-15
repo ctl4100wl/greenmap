@@ -142,7 +142,7 @@
 <main class="wrap">
   <section class="block" id="huong-dan">
     <h3>Hướng dẫn</h3>
-    <div class="box" id="huong-dan-content">Nội dung thêm sau.</div>
+    <div class="box" id="huong-dan-content">asdjasdjakdu.</div>
   </section>
 
   <section class="block" id="danh-sach">
