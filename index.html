@@ -7,11 +7,11 @@
 
 <!-- =====================================================================
      GREEN MAP — 1 FILE, NHIỀU TRANG (hash router)
-     #/            -> Trang chủ
-     #/huong-dan   -> Hướng dẫn
-     #/danh-sach   -> Danh sách cây
-     #/du-an       -> Về dự án
-     Bấm menu = đổi hẳn trang, URL đổi, nút Back của trình duyệt hoạt động.
+     #/              Trang chủ
+     #/huong-dan     Hướng dẫn
+     #/danh-sach     Danh sách cây
+     #/du-an         Về dự án
+     #/cay/<slug>    Trang chi tiết 1 loài  <-- QR trỏ vào đây
      Sửa nội dung: chỉ đụng khối CONFIG + PAGES ở cuối file.
      ===================================================================== -->
 
@@ -28,7 +28,6 @@ a{color:inherit;text-decoration:none}
 img{display:block;max-width:100%}
 .wrap{max-width:var(--wrap);margin:0 auto;padding:0 20px}
 
-/* HEADER */
 header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid var(--line)}
 .nav{display:flex;align-items:center;justify-content:space-between;height:72px;gap:16px}
 .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;color:var(--g700);letter-spacing:.5px}
@@ -39,7 +38,6 @@ header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid 
 .menu a.active{color:var(--g700);border-color:var(--g700)}
 .burger{display:none;background:none;border:0;font-size:26px;color:var(--g700);cursor:pointer}
 
-/* CANVA-STYLE STAGE */
 .stage{position:relative;width:100%;aspect-ratio:var(--ar,16/7);overflow:hidden;
        background:#eef8ef;container-type:inline-size}
 .stage>.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
@@ -47,7 +45,6 @@ header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid 
 .layer{position:absolute}
 .t{font-size:calc(var(--fs,4) * 1cqw);line-height:1.1;font-weight:900}
 
-/* PAGE */
 #view{min-height:60vh;animation:fade .25s ease}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .page{padding:48px 0}
@@ -58,12 +55,28 @@ header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid 
 .page ol,.page ul{margin:0 0 12px 20px}
 .page li{margin-bottom:6px}
 
-.grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
-.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+      overflow:hidden;transition:transform .15s, box-shadow .15s;display:block}
+.card:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(20,83,45,.12)}
 .card img{aspect-ratio:4/3;object-fit:cover;width:100%;background:#dfeee3}
 .card .p{padding:14px}
 .card h4{font-size:17px;color:var(--g900)}
 .card small{color:#5b7a66}
+
+/* trang chi tiết */
+.detail{display:grid;gap:28px;grid-template-columns:1.1fr 1fr;align-items:start}
+.gallery{display:grid;gap:10px}
+.gallery .main{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:var(--radius);background:#dfeee3}
+.thumbs{display:flex;gap:10px;flex-wrap:wrap}
+.thumbs img{width:78px;height:60px;object-fit:cover;border-radius:8px;cursor:pointer;
+            border:2px solid transparent;background:#dfeee3}
+.thumbs img.sel{border-color:var(--g500)}
+.facts{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.facts div{display:flex;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line);font-size:15px}
+.facts div:last-child{border:0}
+.facts b{min-width:110px;color:var(--g700)}
+.back{display:inline-block;margin-bottom:16px;color:var(--g700);font-weight:700}
 
 .btn{display:inline-block;background:var(--g500);color:#fff;padding:14px 32px;border-radius:999px;
      font-weight:800;box-shadow:0 6px 18px rgba(46,158,79,.35)}
@@ -80,6 +93,7 @@ footer{background:var(--g900);color:#d9efdd;padding:28px 0;text-align:center;fon
   .burger{display:block}
   .stage{--ar:4/5}
   .page h1{font-size:26px}
+  .detail{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -97,11 +111,10 @@ footer{background:var(--g900);color:#d9efdd;padding:28px 0;text-align:center;fon
 </header>
 
 <div id="view"></div>
-
 <footer id="foot"></footer>
 
 <!-- =====================================================================
-     CONFIG + PAGES — sửa ở đây
+     CONFIG — SỬA Ở ĐÂY
      ===================================================================== -->
 <script>
 const CONFIG = {
@@ -115,14 +128,60 @@ const CONFIG = {
     lead:"Khám phá và tìm hiểu các loài cây trong khuôn viên trường qua bản đồ trực quan và mã QR.",
     cta:"🌳 KHÁM PHÁ CÂY XANH"
   },
+
+  /* slug = phần sau #/cay/... , dùng để in QR. Đừng đổi slug sau khi đã in QR. */
   trees: [
-    { name:"Bàng",      sci:"Terminalia catappa",      img:"assets/cay-bang.jpg" },
-    { name:"Phượng vĩ", sci:"Delonix regia",           img:"assets/cay-phuong.jpg" },
-    { name:"Bằng lăng", sci:"Lagerstroemia speciosa",  img:"assets/cay-bang-lang.jpg" }
+    { slug:"sake", name:"Sa kê", sci:"Artocarpus altilis",
+      imgs:["assets/sake.png","assets/sake2.png"],
+      note:"Lá xẻ thùy sâu rất đặc trưng, quả ăn được." },
+
+    { slug:"phuong-vy", name:"Phượng vĩ", sci:"Delonix regia",
+      imgs:["assets/pvy.png","assets/pvy2.png"],
+      note:"Hoa đỏ rực nở vào mùa hè, gắn với tuổi học trò." },
+
+    { slug:"bang-lang-tim", name:"Bằng lăng tím", sci:"Lagerstroemia speciosa",
+      imgs:["assets/bang-lang-tim.png","assets/bang-lang-tim2.png"],
+      note:"Hoa tím nở thành chùm lớn vào đầu mùa mưa." },
+
+    { slug:"cay-dau", name:"Cây dầu", sci:"Dipterocarpus alatus",
+      imgs:["assets/cay-dau.png","assets/cay-dau2.png","assets/cay-dau3.png"],
+      note:"Thân thẳng, cao; quả có hai cánh xoay khi rơi." },
+
+    { slug:"bang-dai-loan", name:"Bàng Đài Loan", sci:"Terminalia mantaly",
+      imgs:["assets/bang-dai-loan.png","assets/bang-dai-loan2.png"],
+      note:"Tán xòe nhiều tầng, lá nhỏ, cho bóng mát tốt." },
+
+    { slug:"diep-vang", name:"Điệp vàng", sci:"Peltophorum pterocarpum",
+      imgs:["assets/diepvang.png","assets/diepvang2.png"],
+      note:"Hoa vàng thành chùm đứng, tán rộng." },
+
+    { slug:"cay-si", name:"Cây si", sci:"Ficus benjamina",
+      imgs:["assets/caysi.png","assets/caysi2.png"],
+      note:"Rễ phụ buông từ cành xuống, tán dày quanh năm." },
+
+    { slug:"hoa-mong-bo", name:"Hoa móng bò", sci:"Bauhinia purpurea",
+      imgs:["assets/hoamongbo.png","assets/hoamongbo2.png"],
+      note:"Lá chẻ đôi giống dấu móng bò, hoa tím hồng." },
+
+    { slug:"cay-de", name:"Cây đề", sci:"Ficus religiosa",
+      imgs:["assets/cayde1.png","assets/cayde2.png"],
+      note:"Lá hình tim với đuôi nhọn kéo dài rất dễ nhận ra." },
+
+    { slug:"xoai", name:"Xoài", sci:"Mangifera indica",
+      imgs:["assets/xoai.png","assets/xoai2.png"],
+      note:"Cây ăn quả, tán dày, lá non màu đỏ tía." },
+
+    { slug:"hoang-ngoc-lan", name:"Hoàng ngọc lan", sci:"Magnolia champaca",
+      imgs:["assets/hoangoclan.png","assets/hoangoclan2.png"],
+      note:"Hoa vàng cam, hương thơm nồng lan xa." },
+
+    { slug:"but-tung", name:"Bút tùng", sci:"",
+      imgs:["assets/buttung.png","assets/buttung2.png"],
+      note:"Dáng cây thẳng đứng hình tháp." }
   ]
 };
 
-/* ---------- ROUTES: thêm trang mới = thêm 1 mục ở đây ---------- */
+/* ---------- ROUTES ---------- */
 const PAGES = {
 
   "/": {
@@ -140,10 +199,12 @@ const PAGES = {
         </div>
       </div>
       <div class="wrap page">
-        <h3>Bắt đầu từ đâu?</h3>
-        <p>Xem <a href="#/huong-dan" style="color:var(--g700);font-weight:700">Hướng dẫn</a>
-           để biết cách quét mã QR, hoặc mở
-           <a href="#/danh-sach" style="color:var(--g700);font-weight:700">Danh sách cây</a> ngay.</p>
+        <h3>Có gì trong trường?</h3>
+        <p>${CONFIG.trees.length} loài cây đã được ghi nhận và gắn mã QR.</p>
+        <div class="grid">
+          ${CONFIG.trees.slice(0,4).map(cardHTML).join("")}
+        </div>
+        <p style="margin-top:22px"><a href="#/danh-sach" style="color:var(--g700);font-weight:700">Xem tất cả →</a></p>
       </div>`;
     }
   },
@@ -154,11 +215,15 @@ const PAGES = {
       <div class="wrap page">
         <h1>Hướng dẫn</h1>
         <div class="sub">Ba bước để tra cứu một cây trong trường.</div>
-        <ol>
-          <li>Mở camera điện thoại, quét mã QR gắn trên thân cây.</li>
-          <li>Trang thông tin của cây sẽ mở ra: tên, tên khoa học, đặc điểm.</li>
-          <li>Không có QR? Vào mục <a href="#/danh-sach" style="color:var(--g700)">Danh sách cây</a> và tìm theo tên.</li>
-        </ol>
+        <div style="display:grid;gap:24px;grid-template-columns:1fr 320px;align-items:start">
+          <ol>
+            <li>Mở camera điện thoại, đưa vào mã QR gắn trên thân cây.</li>
+            <li>Bấm vào đường link hiện ra — trang thông tin của cây sẽ mở.</li>
+            <li>Không có QR? Vào <a href="#/danh-sach" style="color:var(--g700)">Danh sách cây</a> và tìm theo tên.</li>
+          </ol>
+          <img src="assets/qr-scan.png" alt="Quét mã QR"
+               style="border-radius:var(--radius)" onerror="this.remove()">
+        </div>
       </div>`;
     }
   },
@@ -169,13 +234,7 @@ const PAGES = {
       <div class="wrap page">
         <h1>Danh sách cây</h1>
         <div class="sub">${CONFIG.trees.length} loài đã ghi nhận trong khuôn viên trường.</div>
-        <div class="grid">
-          ${CONFIG.trees.map(t=>`
-            <article class="card">
-              <img src="${t.img}" alt="${t.name}" loading="lazy" onerror="this.removeAttribute('src')">
-              <div class="p"><h4>${t.name}</h4><small><i>${t.sci}</i></small></div>
-            </article>`).join("")}
-        </div>
+        <div class="grid">${CONFIG.trees.map(cardHTML).join("")}</div>
       </div>`;
     }
   },
@@ -186,29 +245,82 @@ const PAGES = {
       <div class="wrap page">
         <h1>Về dự án</h1>
         <div class="sub">Số hoá cây xanh trong khuôn viên THCS Võ Trường Toản.</div>
-        <p>Dự án do học sinh thực hiện, gắn mã QR lên từng cây và lập bản đồ trực quan
-           giúp mọi người tra cứu nhanh thông tin loài cây.</p>
+        <p>Dự án do học sinh thực hiện: khảo sát, chụp ảnh và gắn mã QR lên từng cây,
+           kèm bản đồ trực quan giúp mọi người tra cứu nhanh thông tin loài cây.</p>
       </div>`;
     }
   }
 };
 
-/* ---------- ROUTER ---------- */
+/* ---------- HELPERS ---------- */
 const $ = s => document.querySelector(s);
+const treeBySlug = s => CONFIG.trees.find(t => t.slug === s);
+
+function cardHTML(t){ return `
+  <a class="card" href="#/cay/${t.slug}">
+    <img src="${t.imgs[0]}" alt="${t.name}" loading="lazy" onerror="this.removeAttribute('src')">
+    <div class="p"><h4>${t.name}</h4><small><i>${t.sci || "—"}</i></small></div>
+  </a>`;
+}
+
+function treePage(t){ return `
+  <div class="wrap page">
+    <a class="back" href="#/danh-sach">← Danh sách cây</a>
+    <h1>${t.name}</h1>
+    <div class="sub"><i>${t.sci || "Đang cập nhật tên khoa học"}</i></div>
+    <div class="detail">
+      <div class="gallery">
+        <img class="main" id="mainImg" src="${t.imgs[0]}" alt="${t.name}" onerror="this.removeAttribute('src')">
+        <div class="thumbs">
+          ${t.imgs.map((src,i)=>`<img src="${src}" alt="" data-src="${src}"
+              class="${i===0?'sel':''}" onerror="this.remove()">`).join("")}
+        </div>
+      </div>
+      <div>
+        <div class="facts">
+          <div><b>Tên thường</b><span>${t.name}</span></div>
+          <div><b>Tên khoa học</b><span>${t.sci || "—"}</span></div>
+          <div><b>Đặc điểm</b><span>${t.note || "—"}</span></div>
+          <div><b>Mã QR</b><span>#/cay/${t.slug}</span></div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- ROUTER ---------- */
 $("#brand").textContent = CONFIG.brand;
 $("#foot").textContent  = CONFIG.footer;
 $("#menu").innerHTML = Object.entries(PAGES)
   .map(([p,o]) => `<a href="#${p}" data-path="${p}">${o.label}</a>`).join("");
 
 function router(){
-  const path = (location.hash.replace(/^#/,"") || "/");
-  const page = PAGES[path] || PAGES["/"];
-  document.title = page.title;
-  $("#view").innerHTML = page.render();
+  const path = location.hash.replace(/^#/,"") || "/";
+  let html, title, navPath = path;
+
+  if(path.startsWith("/cay/")){
+    const t = treeBySlug(path.slice(5));
+    if(t){ html = treePage(t); title = t.name + " — Green Map"; navPath = "/danh-sach"; }
+  }
+  if(!html){
+    const page = PAGES[path] || PAGES["/"];
+    html = page.render(); title = page.title;
+    if(!PAGES[path]) navPath = "/";
+  }
+
+  document.title = title;
+  $("#view").innerHTML = html;
   document.querySelectorAll("#menu a").forEach(a =>
-    a.classList.toggle("active", a.dataset.path === path));
+    a.classList.toggle("active", a.dataset.path === navPath));
   $("#menu").classList.remove("open");
   window.scrollTo(0,0);
+
+  // đổi ảnh lớn khi bấm thumbnail
+  document.querySelectorAll(".thumbs img").forEach(img => img.onclick = () => {
+    $("#mainImg").src = img.dataset.src;
+    document.querySelectorAll(".thumbs img").forEach(x => x.classList.remove("sel"));
+    img.classList.add("sel");
+  });
 }
 addEventListener("hashchange", router);
 router();
