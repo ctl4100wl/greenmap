@@ -153,13 +153,15 @@ footer{background:var(--g900);color:#d9efdd;padding:28px 0;text-align:center;fon
   .menu.open{display:flex}
   .menu a{padding:12px 0;border-bottom:1px solid var(--line)}
   .burger{display:block}
-  /* HERO mobile: ảnh nằm trên, chữ nằm dưới, căn giữa */
+  /* HERO mobile: ảnh trên, chữ dưới, không chồng nhau */
   .hero{grid-template-columns:1fr}
-  .hero-photo{order:-1;aspect-ratio:16/10}
+  .hero-photo{order:-1;aspect-ratio:16/11;position:relative}
   .hero-photo img{object-position:62% center}
-  .hero-txt{text-align:center;padding:4px 20px 34px;margin-top:-12%}
+  .hero-photo::after{content:"";position:absolute;left:0;right:0;bottom:0;height:26%;
+       background:linear-gradient(180deg,#eaf7ec00,#eff9f0 78%,#eff9f0)}
+  .hero-txt{text-align:center;padding:18px 20px 34px;margin-top:0}
   .hero-lead{margin-left:auto;margin-right:auto}
-  .hero .leaf{width:110px;opacity:.4}
+  .hero .leaf{display:none}
   .hero .wave{display:none}
   .page{padding:32px 0}
   .page h1{font-size:26px}
@@ -418,20 +420,63 @@ function qrPage(){ return `
   </div>`;
 }
 
-function loadQRLib(){
-  if(window.QRCode) return Promise.resolve();
+const QR_CDNS = [
+  "https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js",
+  "https://unpkg.com/qrcode@1.5.4/build/qrcode.min.js",
+  "https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"
+];
+
+function loadScript(src){
   return new Promise((ok,err)=>{
     const s = document.createElement("script");
-    s.src = "https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js";
-    s.onload = ok; s.onerror = err;
+    s.src = src; s.onload = ok;
+    s.onerror = () => err(new Error(src));
     document.head.appendChild(s);
   });
 }
 
+/* thử lần lượt từng CDN cho tới khi có thư viện dùng được */
+async function loadQRLib(){
+  if(qrReady()) return;
+  for(const url of QR_CDNS){
+    try { await loadScript(url); if(qrReady()) return; }
+    catch(e){ /* thử CDN kế tiếp */ }
+  }
+  throw new Error("no-qr-lib");
+}
+const qrReady = () => (window.QRCode && QRCode.toCanvas) || typeof window.qrcode === "function";
+
+/* vẽ QR lên canvas, tự nhận API của thư viện nào đang có */
+function drawQR(cv, text){
+  if(window.QRCode && QRCode.toCanvas){
+    QRCode.toCanvas(cv, text, { width:520, margin:1, errorCorrectionLevel:"M",
+                                color:{ dark:"#14532d", light:"#ffffff" } });
+    return;
+  }
+  const qr = window.qrcode(0, "M");
+  qr.addData(text); qr.make();
+  const n = qr.getModuleCount(), size = 520, pad = 4, cell = (size - pad*2*(size/n/8)) / n;
+  cv.width = cv.height = size;
+  const ctx = cv.getContext("2d");
+  ctx.fillStyle = "#ffffff"; ctx.fillRect(0,0,size,size);
+  ctx.fillStyle = "#14532d";
+  const off = (size - cell*n)/2;
+  for(let r=0;r<n;r++) for(let c=0;c<n;c++)
+    if(qr.isDark(r,c)) ctx.fillRect(Math.round(off+c*cell), Math.round(off+r*cell),
+                                    Math.ceil(cell), Math.ceil(cell));
+}
+
 async function renderQR(){
   const grid = $("#qrGrid");
+  grid.innerHTML = "<p style='color:var(--mut)'>Đang tải thư viện tạo mã…</p>";
   try { await loadQRLib(); }
-  catch { grid.innerHTML = "<p>Không tải được thư viện QR. Kiểm tra kết nối mạng.</p>"; return; }
+  catch {
+    grid.innerHTML = `<p style="color:#a33">Không tải được thư viện QR từ mọi CDN.
+      Có thể mạng đang chặn jsDelivr/unpkg/cdnjs, hoặc bạn đang mở file offline.
+      <button class="btn ghost" style="margin-top:10px" onclick="renderQR()">Thử lại</button></p>`;
+    return;
+  }
 
   grid.innerHTML = CONFIG.trees.map(t => `
     <div class="qr-item">
@@ -442,9 +487,7 @@ async function renderQR(){
     </div>`).join("");
 
   $$("#qrGrid canvas").forEach(cv => {
-    const url = baseURL() + "#/cay/" + cv.dataset.slug;
-    QRCode.toCanvas(cv, url, { width:520, margin:1, errorCorrectionLevel:"M",
-                               color:{ dark:"#14532d", light:"#ffffff" } });
+    drawQR(cv, baseURL() + "#/cay/" + cv.dataset.slug);
     cv.style.cursor = "pointer";
     cv.title = "Bấm để tải PNG";
     cv.onclick = () => saveCanvas(cv, cv.dataset.slug);
@@ -465,14 +508,17 @@ function downloadAllQR(){
 /* ---------- SCANNER QR (không rời trang) ---------- */
 let qrScanner = null;
 
-function loadScanLib(){
-  if(window.Html5Qrcode) return Promise.resolve();
-  return new Promise((ok,err)=>{
-    const s = document.createElement("script");
-    s.src = "https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js";
-    s.onload = ok; s.onerror = err;
-    document.head.appendChild(s);
-  });
+async function loadScanLib(){
+  if(window.Html5Qrcode) return;
+  const urls = [
+    "https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js",
+    "https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"
+  ];
+  for(const u of urls){
+    try { await loadScript(u); if(window.Html5Qrcode) return; } catch(e){}
+  }
+  throw new Error("no-scan-lib");
 }
 
 async function openScanner(){
