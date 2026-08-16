@@ -122,7 +122,17 @@ footer{background:var(--g900);color:#d9efdd;padding:28px 0;text-align:center;fon
   .menu.open{display:flex}
   .menu a{padding:12px 0;border-bottom:1px solid var(--line)}
   .burger{display:block}
-  .stage{--ar:4/5}
+  /* HERO trên mobile: bỏ toạ độ tuyệt đối, chiều cao theo nội dung */
+  .stage{aspect-ratio:auto;min-height:0;display:flex;align-items:flex-end}
+  .stage>.bg{object-position:center 30%}
+  .stage .hero-txt{position:static!important;width:100%!important;
+                   padding:150px 22px 40px}
+  .stage>.veil{background:linear-gradient(180deg,#eef8ef 0%,#eef8efe8 42%,#eef8efd6 100%)!important}
+  .hero-h1{font-size:clamp(34px,11vw,52px)!important;line-height:1.05}
+  .hero-h2{font-size:clamp(15px,4.4vw,21px)!important;margin-top:6px!important}
+  .hero-badge{font-size:clamp(13px,3.6vw,17px)!important;margin-top:12px!important}
+  .hero-lead{font-size:15px!important;margin-top:14px!important;max-width:34em}
+  .hero-cta{font-size:15px!important;margin-top:20px!important;padding:13px 26px}
   .page{padding:32px 0}
   .page h1{font-size:26px}
   .tree-head{grid-template-columns:1fr;gap:20px}
@@ -165,7 +175,7 @@ const CONFIG = {
   brand: "GREEN MAP",
   footer: "© 2026 Green Map — THCS Võ Trường Toản",
   hero: {
-    image:"assets/hero.jpg",
+    image:"assets/hero.webp",
     h1:"GREEN MAP",
     h2:"BẢN ĐỒ CÂY XANH TRONG TRƯỜNG",
     school:"THCS VÕ TRƯỜNG TOẢN",
@@ -421,12 +431,12 @@ const PAGES = {
       <div class="stage">
         <img class="bg" src="${h.image}" alt="" onerror="this.remove()">
         <div class="veil" style="background:linear-gradient(90deg,#eef8effa 0%,#eef8efe6 45%,#eef8ef00 78%)"></div>
-        <div class="layer" style="left:6%;top:20%;width:56%">
-          <div class="t" style="--fs:7.5;color:var(--g900);letter-spacing:-.02em">${h.h1}</div>
-          <div class="t" style="--fs:3.1;color:var(--g700);margin-top:.4em">${h.h2}</div>
-          <div class="badge t" style="--fs:2.6;margin-top:.7em">${h.school}</div>
-          <p style="font-size:calc(1.35cqw + 6px);margin-top:1em;color:#2c4a37">${h.lead}</p>
-          <a class="btn" href="#/danh-sach" style="margin-top:1.2em;font-size:calc(1.2cqw + 6px)">${h.cta}</a>
+        <div class="layer hero-txt" style="left:6%;top:20%;width:56%">
+          <div class="t hero-h1" style="--fs:7.5;color:var(--g900);letter-spacing:-.02em">${h.h1}</div>
+          <div class="t hero-h2" style="--fs:3.1;color:var(--g700);margin-top:.4em">${h.h2}</div>
+          <div class="badge t hero-badge" style="--fs:2.6;margin-top:.7em">${h.school}</div>
+          <p class="hero-lead" style="font-size:calc(1.35cqw + 6px);margin-top:1em;color:#2c4a37">${h.lead}</p>
+          <a class="btn hero-cta" href="#/danh-sach" style="margin-top:1.2em;font-size:calc(1.2cqw + 6px)">${h.cta}</a>
         </div>
       </div>
       <div class="wrap page">
