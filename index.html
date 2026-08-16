@@ -76,7 +76,9 @@ header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid 
 
 /* ---------- TRANG CHI TIẾT CÂY ---------- */
 .back{display:inline-block;margin-bottom:18px;color:var(--g700);font-weight:700}
-.tree-head{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:30px;align-items:start}
+.tree-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:30px;align-items:center}
+.tree-head:not(:has(.gallery)){grid-template-columns:1fr}   /* mất ảnh -> chữ full width */
+.gallery:empty{display:none}
 .tree-title h1{font-size:clamp(28px,4vw,42px);color:var(--g900);margin:0}
 .tree-title .sci{font-style:italic;color:var(--mut);font-size:18px;margin-top:2px}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
@@ -322,21 +324,23 @@ function treePage(t, i){
           ${t.alias  ? `<span class="chip">🏷️ ${t.alias}</span>` : ""}
           <span class="chip">📍 THCS Võ Trường Toản</span>
         </div>
-        <div class="info" style="margin-top:22px;grid-template-columns:1fr">
-          ${box("🔎","Đặc điểm nhận biết", t.desc)}
-        </div>
       </div>
 
       <div class="gallery">
-        <img class="main" id="mainImg" src="${t.imgs[0]}" alt="${t.name}" onerror="this.removeAttribute('src')">
+        <img class="main" id="mainImg" src="${t.imgs[0]}" alt="${t.name}"
+             onerror="this.closest('.gallery').remove()">
         <div class="thumbs">
-          ${t.imgs.map((src,k)=>`<img src="${src}" alt="" data-src="${src}"
-             class="${k===0?'sel':''}" onerror="this.remove()">`).join("")}
+          ${t.imgs.length > 1 ? t.imgs.map((src,k)=>`<img src="${src}" alt="" data-src="${src}"
+             class="${k===0?'sel':''}" onerror="this.remove()">`).join("") : ""}
         </div>
       </div>
     </div>
 
     <div class="info">
+      ${t.desc ? `<div class="box wide" style="background:#fff;border-color:var(--line)">
+          <h4><span class="ico">🔎</span>Đặc điểm nhận biết</h4>
+          <p>${t.desc}</p>
+        </div>` : ""}
       ${box("🧺","Công dụng", t.uses)}
       ${box("🌍","Giá trị sinh thái", t.eco)}
       ${t.fun ? `<div class="box wide">
