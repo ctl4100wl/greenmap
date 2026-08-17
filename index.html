@@ -104,6 +104,8 @@ header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid 
 .qr-item canvas{width:100%!important;height:auto!important;max-width:180px;margin:0 auto}
 .qr-item .nm{font-weight:800;color:var(--g900);margin-top:8px;font-size:15px}
 .qr-item .sc{font-style:italic;color:var(--mut);font-size:12.5px}
+.qr-item .id{display:inline-block;margin-top:6px;background:var(--g100);color:var(--g700);
+      border-radius:8px;padding:2px 10px;font-size:12px;font-weight:800;letter-spacing:.08em}
 .qr-item .url{font-size:10.5px;color:#8aa693;word-break:break-all;margin-top:4px}
 
 /* ---------- SCANNER QR ---------- */
@@ -224,7 +226,27 @@ const CONFIG = {
     cta:"🌳 KHÁM PHÁ CÂY XANH"
   },
 
-  /* slug = phần sau #/cay/... — ĐỪNG đổi sau khi đã in QR dán lên cây */
+  /* ---------------------------------------------------------------
+     QR ĐỘNG: mã in ra trỏ tới #/go/<id>, id KHÔNG BAO GIỜ đổi.
+     Muốn mã T03 chỉ sang cây khác? Chỉ sửa slug ở dòng dưới rồi push.
+     QR đã dán trên cây vẫn dùng được, không cần in lại.
+     --------------------------------------------------------------- */
+  qrMap: {
+    "t01":"bang-dai-loan",
+    "t02":"cay-dau",
+    "t03":"bang-lang-tim",
+    "t04":"phuong-vy",
+    "t05":"sa-ke",
+    "t06":"diep-vang",
+    "t07":"but-tung",
+    "t08":"ngoc-lan",
+    "t09":"xoai",
+    "t10":"cay-de",
+    "t11":"mong-bo",
+    "t12":"cay-si"
+  },
+
+  /* slug = phần sau #/cay/... */
   trees: [
     {
       slug:"bang-dai-loan", name:"Bàng Đài Loan", sci:"Terminalia mantaly",
@@ -411,7 +433,7 @@ function treePage(t, i){
 function qrPage(){ return `
   <div class="wrap page">
     <h1>Tạo mã QR hàng loạt</h1>
-    <div class="sub noprint">Mỗi mã trỏ tới trang chi tiết của một cây. Bấm “In” để in ra giấy dán, hoặc bấm từng mã để tải PNG.</div>
+    <div class="sub noprint">Mã QR động: mỗi mã trỏ tới <b>#/go/&lt;id&gt;</b>, đích đến đổi được trong <b>CONFIG.qrMap</b> mà không phải in lại. Bấm “In” để in ra giấy dán, hoặc bấm từng mã để tải PNG.</div>
     <div class="noprint" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:6px">
       <button class="btn" onclick="window.print()">🖨️ In tất cả</button>
       <button class="btn ghost" onclick="downloadAllQR()">⬇️ Tải tất cả PNG</button>
@@ -478,19 +500,25 @@ async function renderQR(){
     return;
   }
 
-  grid.innerHTML = CONFIG.trees.map(t => `
+  const items = Object.entries(CONFIG.qrMap).map(([id,slug]) => {
+    const t = CONFIG.trees[idxOf(slug)];
+    return { id, slug, name: t ? t.name : "⚠ slug sai: " + slug, sci: t ? t.sci : "" };
+  });
+
+  grid.innerHTML = items.map(it => `
     <div class="qr-item">
-      <canvas data-slug="${t.slug}"></canvas>
-      <div class="nm">${t.name}</div>
-      <div class="sc">${t.sci || ""}</div>
-      <div class="url noprint">${baseURL()}#/cay/${t.slug}</div>
+      <canvas data-id="${it.id}"></canvas>
+      <div class="nm">${it.name}</div>
+      <div class="sc">${it.sci || ""}</div>
+      <div class="id">${it.id.toUpperCase()}</div>
+      <div class="url noprint">${baseURL()}#/go/${it.id}</div>
     </div>`).join("");
 
   $$("#qrGrid canvas").forEach(cv => {
-    drawQR(cv, baseURL() + "#/cay/" + cv.dataset.slug);
+    drawQR(cv, baseURL() + "#/go/" + cv.dataset.id);
     cv.style.cursor = "pointer";
     cv.title = "Bấm để tải PNG";
-    cv.onclick = () => saveCanvas(cv, cv.dataset.slug);
+    cv.onclick = () => saveCanvas(cv, cv.dataset.id);
   });
 }
 
@@ -502,7 +530,7 @@ function saveCanvas(cv, name){
 }
 function downloadAllQR(){
   $$("#qrGrid canvas").forEach((cv,i) =>
-    setTimeout(() => saveCanvas(cv, cv.dataset.slug), i * 350));
+    setTimeout(() => saveCanvas(cv, cv.dataset.id), i * 350));
 }
 
 /* ---------- SCANNER QR (không rời trang) ---------- */
@@ -545,8 +573,10 @@ async function openScanner(){
 }
 
 function onScanned(text){
-  const m = String(text).match(/#\/cay\/([a-z0-9-]+)/i);
-  const slug = m ? m[1] : null;
+  const s = String(text);
+  const go  = s.match(/#\/go\/([a-z0-9-]+)/i);
+  const cay = s.match(/#\/cay\/([a-z0-9-]+)/i);
+  const slug = go ? CONFIG.qrMap[go[1].toLowerCase()] : (cay ? cay[1] : null);
 
   if(slug && idxOf(slug) > -1){
     closeScanner();
@@ -659,6 +689,16 @@ $("#menu").innerHTML = Object.entries(PAGES).filter(([,o]) => o.inMenu)
 function router(){
   const path = location.hash.replace(/^#/,"") || "/";
   let html, title, navPath = path, after = null;
+
+  /* QR động: #/go/t03 -> tra bảng -> chuyển sang trang cây */
+  if(path.startsWith("/go/")){
+    const slug = CONFIG.qrMap[path.slice(4).toLowerCase()];
+    if(slug && idxOf(slug) > -1){ location.replace("#/cay/" + slug); return; }
+    $("#view").innerHTML = `<div class="wrap page"><h1>Mã không hợp lệ</h1>
+      <div class="sub">Mã QR này chưa được gán cho cây nào.</div>
+      <a class="btn" href="#/danh-sach">Xem danh sách cây</a></div>`;
+    return;
+  }
 
   if(path.startsWith("/cay/")){
     const i = idxOf(path.slice(5));
