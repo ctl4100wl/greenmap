@@ -212,6 +212,6 @@
     }
   ],
   "pages": {
-    "about": "<style>* { box-sizing: border-box; } body {margin: 0;}.reveal.about-mission{font-size:20px;font-family:Comic Sans MS, cursive, sans-serif;}#iwbf{margin:10px 0;}</style>\n<body id=\"iilw\"><div class=\"wrap page\"><h1>Về dự án</h1><div class=\"sub\">Số hoá cây xanh trong khuôn viên THCS VÕ TRƯỜNG TOẢN.</div><p class=\"reveal about-mission\">Dự án do Đỗ Mạnh Khang và Nguyễn Minh Đăng thực hiện</p></div><p id=\"iwbf\">Được làm bằng HTML/CSS/JS, GitHub Pages <br/>Library:<b> jscdn</b>: GrapesJS, webqr</p></body>"
+    "about": "<style>* { box-sizing: border-box; } body {margin: 0;}*{box-sizing:border-box;}body{margin-top:0px;margin-right:0px;margin-bottom:0px;margin-left:0px;}.reveal.about-mission{font-size:20px;font-family:\"Comic Sans MS\", cursive, sans-serif;}#iwbf{margin-top:10px;margin-right:0px;margin-bottom:10px;margin-left:0px;}</style>\n<body><div class=\"wrap page\"><h1>Về dự án</h1><div class=\"sub\">Số hoá cây xanh trong khuôn viên THCS VÕ TRƯỜNG TOẢN.</div><p class=\"reveal about-mission\">Dự án do Đỗ Mạnh Khang và Nguyễn Minh Đăng thực hiện</p><p id=\"iwbf\">Được làm bằng HTML/CSS/JS, GitHub Pages <br/>Library:<b> jscdn</b>: GrapesJS, webqr</p></div></body>"
   }
 }
