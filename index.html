@@ -284,13 +284,20 @@ footer{background:var(--g900);color:#d9efdd;padding:28px 0;text-align:center;fon
 /* -- Kéo-thả (GrapesJS) -- */
 #builder{position:fixed;inset:0;z-index:150;background:#fff;display:none;flex-direction:column}
 #builder.on{display:flex}
-.bd-top{display:flex;align-items:center;gap:10px;padding:10px 16px;
+.bd-top{display:flex;align-items:center;gap:8px;padding:10px 16px;
         background:var(--g900);color:#fff;flex:none}
 .bd-top b{font-size:15px}
-#gjs{flex:1;min-height:0}
-/* GrapesJS mặc định co block ngang — thu gọn panel phải cho gọn */
-.gjs-pn-views-container{width:230px!important}
-.gjs-cv-canvas{width:calc(100% - 230px)!important}
+.bd-top .btn.ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.45)}
+.bd-top .btn.ghost:hover{background:rgba(255,255,255,.14)}
+.bd-body{flex:1;display:flex;min-height:0}
+.bd-side{width:250px;flex:none;overflow-y:auto;background:#fafcfa;border-right:1px solid var(--line)}
+.bd-right{border-right:0;border-left:1px solid var(--line)}
+.bd-sect{padding:10px 14px;font-size:11.5px;font-weight:800;letter-spacing:.06em;
+         text-transform:uppercase;color:var(--g700);background:var(--g100);position:sticky;top:0;z-index:2}
+#gjs{flex:1;min-width:0}
+@media(max-width:880px){
+  .bd-side{display:none}
+}
 
 /* ================= MOBILE ================= */
 @media(max-width:880px){
@@ -356,10 +363,27 @@ footer{background:var(--g900);color:#d9efdd;padding:28px 0;text-align:center;fon
   <div class="bd-top noprint">
     <b id="bdTitle">Kéo-thả</b>
     <span style="flex:1"></span>
+    <button class="btn ghost sm" onclick="gjsDevice('desktop')">🖥️</button>
+    <button class="btn ghost sm" onclick="gjsDevice('mobile')">📱</button>
+    <button class="btn ghost sm" onclick="gjsEditor&&gjsEditor.runCommand('core:undo')">↶</button>
+    <button class="btn ghost sm" onclick="gjsEditor&&gjsEditor.runCommand('core:redo')">↷</button>
     <button class="btn ghost sm" onclick="closeBuilder()">Huỷ</button>
     <button class="btn sm" onclick="saveBuilder()">💾 Lưu</button>
   </div>
-  <div id="gjs"></div>
+  <div class="bd-body">
+    <aside class="bd-side bd-left">
+      <div class="bd-sect">Khối kéo vào</div>
+      <div id="gjs-blocks"></div>
+    </aside>
+    <div id="gjs"></div>
+    <aside class="bd-side bd-right">
+      <div class="bd-sect">Lớp</div>
+      <div id="gjs-layers"></div>
+      <div class="bd-sect">Định dạng</div>
+      <div id="gjs-selectors"></div>
+      <div id="gjs-styles"></div>
+    </aside>
+  </div>
 </div>
 
 <footer id="foot"></footer>
@@ -391,11 +415,6 @@ const DATA = {
 
   about: {
     mission: "Dự án do học sinh thực hiện: khảo sát, chụp ảnh và gắn mã QR lên từng cây, kèm bản đồ trực quan giúp mọi người tra cứu nhanh thông tin loài cây.",
-    stats: [
-      { num:"12", label:"Loài cây" },
-      { num:"24+", label:"Ảnh tư liệu" },
-      { num:"1", label:"Trường học" }
-    ],
     timeline: [
       { step:"Khảo sát", text:"Đi quanh trường, xác định và chụp ảnh từng loài cây." },
       { step:"Biên soạn", text:"Tra cứu tên khoa học, đặc điểm, công dụng cho mỗi loài." },
@@ -520,6 +539,18 @@ function toast(msg){
   document.body.appendChild(el);
   setTimeout(()=>{ el.style.opacity="0"; el.style.transition="opacity .3s"; }, 1700);
   setTimeout(()=>el.remove(), 2100);
+}
+
+/* thống kê tự tính từ dữ liệu thật — không hardcode */
+function autoStats(){
+  const trees = CONFIG.trees || [];
+  const photos = trees.reduce((n,t) => n + (t.imgs||[]).length, 0);
+  const families = new Set(trees.map(t => t.family).filter(Boolean)).size;
+  return [
+    { num: String(trees.length),  label:"Loài cây" },
+    { num: String(photos),        label:"Ảnh tư liệu" },
+    { num: String(families),      label:"Họ thực vật" }
+  ];
 }
 
 function cardHTML(t, i=0){ return `
@@ -771,15 +802,24 @@ async function openBuilder(key){
   const page = PAGES[ key==="home" ? "/" : key==="guide" ? "/huong-dan" : "/du-an" ];
   const startHTML = DRAFT.pages?.[key] || page.defaultHTML();
 
+  /* CSS thật của site — lấy thẳng từ thẻ <style> đầu trang để nhồi vào iframe */
+  const siteCSS = document.querySelector("style")?.textContent || "";
+
   gjsEditor = grapesjs.init({
     container: "#gjs",
     height: "100%",
     fromElement: false,
     storageManager: false,
     components: startHTML,
-    canvas: { styles: [ location.href.split("#")[0] ] },
+    protectedCss: siteCSS,          // luôn có mặt trong canvas, không bị GrapesJS xoá
+    deviceManager: {
+      devices: [
+        { id:"desktop", name:"Desktop", width:"" },
+        { id:"mobile",  name:"Mobile",  width:"390px", widthMedia:"880px" }
+      ]
+    },
     blockManager: {
-      appendTo: "#gjs",
+      appendTo: "#gjs-blocks",
       blocks: [
         { id:"text", label:"Đoạn văn", category:"Cơ bản",
           content:'<p style="margin:10px 0">Nội dung mới…</p>' },
@@ -789,19 +829,40 @@ async function openBuilder(key){
           content:{ type:"image", style:{ "max-width":"100%" } } },
         { id:"button", label:"Nút bấm", category:"Cơ bản",
           content:'<a class="btn" href="#/danh-sach">Nút bấm</a>' },
+        { id:"wrap", label:"Khung nội dung", category:"Bố cục",
+          content:'<div class="wrap page"><p>Khối nội dung căn giữa — kéo thứ khác vào đây.</p></div>' },
         { id:"section", label:"Khối (div)", category:"Bố cục",
-          content:'<div style="padding:20px;min-height:60px;border:1px dashed #cfe6d4">Khối nội dung — kéo thêm thứ khác vào đây</div>' },
+          content:'<div style="padding:20px;min-height:60px;border:1px dashed #cfe6d4">Khối nội dung</div>' },
         { id:"row2", label:"2 cột", category:"Bố cục",
           content:'<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px"><div style="min-height:60px;border:1px dashed #cfe6d4;padding:14px">Cột 1</div><div style="min-height:60px;border:1px dashed #cfe6d4;padding:14px">Cột 2</div></div>' },
         { id:"stat", label:"Ô số liệu", category:"Green Map",
-          content:'<div class="stat" style="display:inline-block;margin:6px"><div class="stat-num">12</div><div class="stat-label">Nhãn</div></div>' }
+          content:'<div class="stat"><div class="stat-num">12</div><div class="stat-label">Nhãn</div></div>' },
+        { id:"statrow", label:"Hàng số liệu", category:"Green Map",
+          content:'<div class="stat-row"><div class="stat"><div class="stat-num">12</div><div class="stat-label">Loài cây</div></div><div class="stat"><div class="stat-num">24</div><div class="stat-label">Ảnh</div></div></div>' },
+        { id:"box", label:"Ô thông tin", category:"Green Map",
+          content:'<div class="box" style="border:1px solid #dde9de;border-radius:16px;padding:20px 22px"><h4 style="color:#1f7a3d;text-transform:uppercase;font-size:15px;margin-bottom:8px">✨ Tiêu đề</h4><p>Nội dung.</p></div>' },
+        { id:"tl", label:"Bước quy trình", category:"Green Map",
+          content:'<div class="tl-item"><div class="tl-dot">1</div><div class="tl-body"><div class="tl-step">Tên bước</div><div class="tl-text">Mô tả bước.</div></div></div>' }
       ]
     },
-    layerManager: { appendTo: "#gjs" },
-    selectorManager: { appendTo: "#gjs" },
+    layerManager:    { appendTo: "#gjs-layers" },
+    selectorManager: { appendTo: "#gjs-selectors" },
+    styleManager:    { appendTo: "#gjs-styles" },
     panels: { defaults: [] }
   });
+
+  /* chèn thêm CSS vào document của iframe cho chắc (một số bản GrapesJS bỏ qua protectedCss) */
+  gjsEditor.on("load", () => {
+    const doc = gjsEditor.Canvas.getDocument();
+    if(doc && !doc.getElementById("site-css")){
+      const st = doc.createElement("style");
+      st.id = "site-css"; st.textContent = siteCSS;
+      doc.head.appendChild(st);
+    }
+  });
 }
+
+function gjsDevice(d){ if(gjsEditor) gjsEditor.setDevice(d === "mobile" ? "Mobile" : "Desktop"); }
 
 function saveBuilder(){
   if(!gjsEditor || !gjsPageKey) return;
@@ -923,10 +984,11 @@ function adminPage(){
         <button class="btn ghost sm" onclick="openBuilder('about')" style="margin-bottom:14px">🖱️ Sửa bằng kéo-thả</button>
         ${F("Mô tả sứ mệnh","about.mission",DRAFT.about?.mission||"","area")}
 
-        <label style="display:block;font-size:12.5px;font-weight:800;color:var(--g700);
-               text-transform:uppercase;letter-spacing:.04em;margin:16px 0 6px">Số liệu nổi bật</label>
-        <div id="statList">${(DRAFT.about?.stats||[]).map(statRow).join("")}</div>
-        <button class="btn ghost sm" onclick="addStat()">＋ Thêm số liệu</button>
+        <div class="adm-note" style="margin:14px 0">
+          📊 <b>Số liệu nổi bật tự tính</b> từ dữ liệu cây — hiện tại:
+          ${autoStats().map(s=>`<b>${s.num}</b> ${s.label.toLowerCase()}`).join(" · ")}.
+          Thêm/bớt cây hoặc ảnh là số tự đổi theo, không cần sửa tay.
+        </div>
 
         <label style="display:block;font-size:12.5px;font-weight:800;color:var(--g700);
                text-transform:uppercase;letter-spacing:.04em;margin:18px 0 6px">Quy trình thực hiện</label>
@@ -1036,26 +1098,6 @@ function refreshHeroChecks(){
 function checkAllImgs(){ allImageRefs().forEach((r,i) => checkImg("a"+i, r.src)); }
 
 /* -- About: số liệu nổi bật -- */
-function statRow(s,i){ return `
-  <div class="minirow">
-    <input placeholder="Số (12)" value="${esc(s.num)}" style="width:90px"
-           oninput="DRAFT.about.stats[${i}].num=this.value;lsSet(JSON.stringify(DRAFT))">
-    <input placeholder="Nhãn (Loài cây)" value="${esc(s.label)}"
-           oninput="DRAFT.about.stats[${i}].label=this.value;lsSet(JSON.stringify(DRAFT))">
-    <button class="rmimg" onclick="delStat(${i})" title="Xoá">✕</button>
-  </div>`;
-}
-function addStat(){
-  DRAFT.about = DRAFT.about || {}; DRAFT.about.stats = DRAFT.about.stats || [];
-  DRAFT.about.stats.push({ num:"", label:"" });
-  $("#statList").innerHTML = DRAFT.about.stats.map(statRow).join("");
-  lsSet(JSON.stringify(DRAFT));
-}
-function delStat(i){
-  DRAFT.about.stats.splice(i,1);
-  $("#statList").innerHTML = DRAFT.about.stats.map(statRow).join("");
-  lsSet(JSON.stringify(DRAFT));
-}
 
 /* -- About: quy trình thực hiện -- */
 function tlRow(t,i){ return `
@@ -1252,14 +1294,13 @@ const PAGES = {
 
         <p class="reveal about-mission">${esc(a.mission||"")}</p>
 
-        ${(a.stats||[]).length ? `
         <div class="stat-row">
-          ${a.stats.map((s,i)=>`
+          ${autoStats().map((s,i)=>`
             <div class="stat reveal" style="transition-delay:${i*60}ms">
               <div class="stat-num">${esc(s.num)}</div>
               <div class="stat-label">${esc(s.label)}</div>
             </div>`).join("")}
-        </div>` : ""}
+        </div>
 
         ${(a.timeline||[]).length ? `
         <h3>Quy trình thực hiện</h3>
