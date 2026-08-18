@@ -257,12 +257,6 @@ footer{background:var(--g900);color:#d9efdd;padding:28px 0;text-align:center;fon
 
 /* ---- trang Về dự án ---- */
 .about-mission{font-size:18px;color:#2c4a37;max-width:52em;margin-bottom:8px}
-.stat-row{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin:34px 0}
-.stat{border:1px solid var(--line);border-radius:var(--radius);padding:22px 18px;text-align:center;
-      background:var(--paper);transition:transform .25s var(--ease),box-shadow .25s var(--ease)}
-.stat:hover{transform:translateY(-4px);box-shadow:0 10px 24px rgba(20,83,45,.12)}
-.stat-num{font-size:clamp(28px,4vw,40px);font-weight:900;color:var(--g700);line-height:1}
-.stat-label{font-size:13.5px;color:var(--mut);margin-top:6px;text-transform:uppercase;letter-spacing:.04em}
 
 .tl{position:relative;margin-top:18px;padding-left:8px}
 .tl::before{content:"";position:absolute;left:19px;top:6px;bottom:6px;width:2px;background:var(--line)}
@@ -541,17 +535,29 @@ function toast(msg){
   setTimeout(()=>el.remove(), 2100);
 }
 
-/* thống kê tự tính từ dữ liệu thật — không hardcode */
-function autoStats(){
-  const trees = CONFIG.trees || [];
-  const photos = trees.reduce((n,t) => n + (t.imgs||[]).length, 0);
-  const families = new Set(trees.map(t => t.family).filter(Boolean)).size;
-  return [
-    { num: String(trees.length),  label:"Loài cây" },
-    { num: String(photos),        label:"Ảnh tư liệu" },
-    { num: String(families),      label:"Họ thực vật" }
-  ];
-}
+/* ---- helper dựng markup, gom HTML lặp lại về một chỗ ---- */
+const H = {
+  page:  (title, sub, body) => `<div class="wrap page">
+    <h1>${esc(title)}</h1>${sub ? `<div class="sub">${esc(sub)}</div>` : ""}${body}</div>`,
+
+  list:  (arr, fn, delay = 60) => (arr||[])
+    .map((x,i) => fn(x, i, ` class="reveal" style="transition-delay:${i*delay}ms"`)).join(""),
+
+  timeline: arr => !(arr||[]).length ? "" :
+    `<h3>Quy trình thực hiện</h3><div class="tl">${(arr||[]).map((t,i) =>
+      `<div class="tl-item reveal" style="transition-delay:${i*70}ms">
+         <div class="tl-dot">${i+1}</div>
+         <div class="tl-body">
+           <div class="tl-step">${esc(t.step)}</div>
+           <div class="tl-text">${esc(t.text)}</div>
+         </div>
+       </div>`).join("")}</div>`,
+
+  box: (ico, title, text, cls="") => text ? `<div class="box ${cls} reveal">
+    <h4><span class="ico">${ico}</span>${esc(title)}</h4><p>${esc(text)}</p></div>` : "",
+
+  chip: (ico, text) => text ? `<span class="chip">${ico} ${esc(text)}</span>` : ""
+};
 
 function cardHTML(t, i=0){ return `
   <a class="card reveal" style="transition-delay:${i*45}ms" href="#/cay/${t.slug}">
@@ -617,11 +623,6 @@ addEventListener("keydown", e => {
 function treePage(t, i){
   const prev = CONFIG.trees[(i - 1 + CONFIG.trees.length) % CONFIG.trees.length];
   const next = CONFIG.trees[(i + 1) % CONFIG.trees.length];
-  const box = (ico, title, text, cls="") => text ? `
-    <div class="box ${cls} reveal">
-      <h4><span class="ico">${ico}</span>${title}</h4>
-      <p>${esc(text)}</p>
-    </div>` : "";
 
   return `
   <div class="wrap page">
@@ -631,18 +632,16 @@ function treePage(t, i){
         <h1>${esc(t.name)}</h1>
         <div class="sci">${esc(t.sci) || "Đang cập nhật tên khoa học"}</div>
         <div class="chips">
-          ${t.family ? `<span class="chip">🌿 ${esc(t.family)}</span>` : ""}
-          ${t.alias  ? `<span class="chip">🏷️ ${esc(t.alias)}</span>` : ""}
-          <span class="chip">📍 ${esc(CONFIG.hero.school)}</span>
+          ${H.chip("🌿", t.family)}${H.chip("🏷️", t.alias)}${H.chip("📍", CONFIG.hero.school)}
         </div>
       </div>
       ${galleryHTML(t)}
     </div>
     <div class="info">
-      ${box("🔎","Đặc điểm nhận biết", t.desc, "wide")}
-      ${box("🧺","Công dụng", t.uses)}
-      ${box("🌍","Giá trị sinh thái", t.eco)}
-      ${box("✨", t.funLabel || "Điều thú vị", t.fun, "wide fun")}
+      ${H.box("🔎","Đặc điểm nhận biết", t.desc, "wide")}
+      ${H.box("🧺","Công dụng", t.uses)}
+      ${H.box("🌍","Giá trị sinh thái", t.eco)}
+      ${H.box("✨", t.funLabel || "Điều thú vị", t.fun, "wide fun")}
     </div>
     <div class="nextprev">
       <a href="#/cay/${prev.slug}">← ${esc(prev.name)}</a>
@@ -759,7 +758,7 @@ $("#scan").addEventListener("click", e => { if(e.target.id === "scan") closeScan
 addEventListener("keydown", e => { if(e.key === "Escape") closeScanner(); });
 
 /* ================= KÉO-THẢ (GrapesJS) ================= */
-let gjsEditor = null, gjsPageKey = null;
+let gjsEditor = null, gjsPageKey = null, gjsCSSUrl = null;
 const GJS_CSS = [
   "https://cdn.jsdelivr.net/npm/grapesjs@0.21.9/dist/css/grapes.min.css",
   "https://unpkg.com/grapesjs@0.21.9/dist/css/grapes.min.css"
@@ -802,8 +801,10 @@ async function openBuilder(key){
   const page = PAGES[ key==="home" ? "/" : key==="guide" ? "/huong-dan" : "/du-an" ];
   const startHTML = DRAFT.pages?.[key] || page.defaultHTML();
 
-  /* CSS thật của site — lấy thẳng từ thẻ <style> đầu trang để nhồi vào iframe */
-  const siteCSS = document.querySelector("style")?.textContent || "";
+  /* CSS thật của site → đóng thành file .css ảo để iframe nạp được như stylesheet bình thường */
+  const siteCSS = [...document.querySelectorAll("style")].map(s => s.textContent).join("\n");
+  if(gjsCSSUrl) URL.revokeObjectURL(gjsCSSUrl);
+  gjsCSSUrl = URL.createObjectURL(new Blob([siteCSS], { type:"text/css" }));
 
   gjsEditor = grapesjs.init({
     container: "#gjs",
@@ -811,7 +812,7 @@ async function openBuilder(key){
     fromElement: false,
     storageManager: false,
     components: startHTML,
-    protectedCss: siteCSS,          // luôn có mặt trong canvas, không bị GrapesJS xoá
+    canvas: { styles: [ gjsCSSUrl ] },
     deviceManager: {
       devices: [
         { id:"desktop", name:"Desktop", width:"" },
@@ -835,10 +836,6 @@ async function openBuilder(key){
           content:'<div style="padding:20px;min-height:60px;border:1px dashed #cfe6d4">Khối nội dung</div>' },
         { id:"row2", label:"2 cột", category:"Bố cục",
           content:'<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px"><div style="min-height:60px;border:1px dashed #cfe6d4;padding:14px">Cột 1</div><div style="min-height:60px;border:1px dashed #cfe6d4;padding:14px">Cột 2</div></div>' },
-        { id:"stat", label:"Ô số liệu", category:"Green Map",
-          content:'<div class="stat"><div class="stat-num">12</div><div class="stat-label">Nhãn</div></div>' },
-        { id:"statrow", label:"Hàng số liệu", category:"Green Map",
-          content:'<div class="stat-row"><div class="stat"><div class="stat-num">12</div><div class="stat-label">Loài cây</div></div><div class="stat"><div class="stat-num">24</div><div class="stat-label">Ảnh</div></div></div>' },
         { id:"box", label:"Ô thông tin", category:"Green Map",
           content:'<div class="box" style="border:1px solid #dde9de;border-radius:16px;padding:20px 22px"><h4 style="color:#1f7a3d;text-transform:uppercase;font-size:15px;margin-bottom:8px">✨ Tiêu đề</h4><p>Nội dung.</p></div>' },
         { id:"tl", label:"Bước quy trình", category:"Green Map",
@@ -851,15 +848,18 @@ async function openBuilder(key){
     panels: { defaults: [] }
   });
 
-  /* chèn thêm CSS vào document của iframe cho chắc (một số bản GrapesJS bỏ qua protectedCss) */
-  gjsEditor.on("load", () => {
-    const doc = gjsEditor.Canvas.getDocument();
+  /* dự phòng: nếu vì lý do gì blob không vào, nhồi thẳng <style> vào iframe */
+  const injectCSS = () => {
+    const doc = gjsEditor?.Canvas?.getDocument?.();
     if(doc && !doc.getElementById("site-css")){
       const st = doc.createElement("style");
       st.id = "site-css"; st.textContent = siteCSS;
       doc.head.appendChild(st);
     }
-  });
+  };
+  gjsEditor.on("canvas:frame:load", injectCSS);
+  gjsEditor.on("load", injectCSS);
+  setTimeout(injectCSS, 600);
 }
 
 function gjsDevice(d){ if(gjsEditor) gjsEditor.setDevice(d === "mobile" ? "Mobile" : "Desktop"); }
@@ -878,6 +878,7 @@ function saveBuilder(){
 function closeBuilder(){
   $("#builder").classList.remove("on");
   if(gjsEditor){ gjsEditor.destroy(); gjsEditor = null; }
+  if(gjsCSSUrl){ URL.revokeObjectURL(gjsCSSUrl); gjsCSSUrl = null; }
   gjsPageKey = null;
 }
 function clearPageHTML(key){
@@ -984,11 +985,6 @@ function adminPage(){
         <button class="btn ghost sm" onclick="openBuilder('about')" style="margin-bottom:14px">🖱️ Sửa bằng kéo-thả</button>
         ${F("Mô tả sứ mệnh","about.mission",DRAFT.about?.mission||"","area")}
 
-        <div class="adm-note" style="margin:14px 0">
-          📊 <b>Số liệu nổi bật tự tính</b> từ dữ liệu cây — hiện tại:
-          ${autoStats().map(s=>`<b>${s.num}</b> ${s.label.toLowerCase()}`).join(" · ")}.
-          Thêm/bớt cây hoặc ảnh là số tự đổi theo, không cần sửa tay.
-        </div>
 
         <label style="display:block;font-size:12.5px;font-weight:800;color:var(--g700);
                text-transform:uppercase;letter-spacing:.04em;margin:18px 0 6px">Quy trình thực hiện</label>
@@ -1260,61 +1256,31 @@ const PAGES = {
 
   "/huong-dan": {
     label:"Hướng dẫn", title:"Hướng dẫn — Green Map", inMenu:true,
-    defaultHTML(){ return `
-      <div class="wrap page">
-        <h1>Hướng dẫn</h1>
-        <div class="sub">${(CONFIG.guide||[]).length} bước để tra cứu một cây trong trường.</div>
-        <div style="display:grid;gap:26px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));align-items:start">
-          <ol>${(CONFIG.guide||[]).map(s=>`<li class="reveal">${esc(s)}</li>`).join("")}</ol>
+    defaultHTML(){
+      return H.page("Hướng dẫn", `${(CONFIG.guide||[]).length} bước để tra cứu một cây trong trường.`,
+        `<div style="display:grid;gap:26px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));align-items:start">
+          <ol>${H.list(CONFIG.guide, (s,i,attr)=>`<li${attr}>${esc(s)}</li>`)}</ol>
           ${CONFIG.guideImage ? `<img class="reveal" src="${CONFIG.guideImage}" alt="Quét mã QR"
              style="border-radius:var(--radius)" onerror="this.remove()">` : ""}
-        </div>
-      </div>`;
+        </div>`);
     },
     render(){ return CONFIG.pages?.guide || this.defaultHTML(); }
   },
 
   "/danh-sach": {
     label:"Danh sách cây", title:"Danh sách cây — Green Map", inMenu:true,
-    render(){ return `
-      <div class="wrap page">
-        <h1>Danh sách cây</h1>
-        <div class="sub">${CONFIG.trees.length} loài đã ghi nhận trong khuôn viên trường.</div>
-        <div class="grid">${CONFIG.trees.map(cardHTML).join("")}</div>
-      </div>`;
+    render(){
+      return H.page("Danh sách cây", `${CONFIG.trees.length} loài đã ghi nhận trong khuôn viên trường.`,
+        `<div class="grid">${CONFIG.trees.map(cardHTML).join("")}</div>`);
     }
   },
 
   "/du-an": {
     label:"Về dự án", title:"Về dự án — Green Map", inMenu:true,
-    defaultHTML(){ const a = CONFIG.about || {}; return `
-      <div class="wrap page">
-        <h1>Về dự án</h1>
-        <div class="sub">Số hoá cây xanh trong khuôn viên ${esc(CONFIG.hero.school)}.</div>
-
-        <p class="reveal about-mission">${esc(a.mission||"")}</p>
-
-        <div class="stat-row">
-          ${autoStats().map((s,i)=>`
-            <div class="stat reveal" style="transition-delay:${i*60}ms">
-              <div class="stat-num">${esc(s.num)}</div>
-              <div class="stat-label">${esc(s.label)}</div>
-            </div>`).join("")}
-        </div>
-
-        ${(a.timeline||[]).length ? `
-        <h3>Quy trình thực hiện</h3>
-        <div class="tl">
-          ${a.timeline.map((t,i)=>`
-            <div class="tl-item reveal" style="transition-delay:${i*70}ms">
-              <div class="tl-dot">${i+1}</div>
-              <div class="tl-body">
-                <div class="tl-step">${esc(t.step)}</div>
-                <div class="tl-text">${esc(t.text)}</div>
-              </div>
-            </div>`).join("")}
-        </div>` : ""}
-      </div>`;
+    defaultHTML(){
+      const a = CONFIG.about || {};
+      return H.page("Về dự án", `Số hoá cây xanh trong khuôn viên ${CONFIG.hero.school}.`,
+        `<p class="reveal about-mission">${esc(a.mission||"")}</p>` + H.timeline(a.timeline));
     },
     render(){ return CONFIG.pages?.about || this.defaultHTML(); }
   },
