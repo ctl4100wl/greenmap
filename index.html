@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Green Map — THCS Võ Trường Toản</title>
 
+<!-- Font: đều có bộ ký tự tiếng Việt đầy đủ -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link id="gm-fonts" rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800;900&family=Nunito:wght@400;600;700;800;900&family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Roboto+Slab:wght@400;600;700;800&display=swap&subset=vietnamese">
+
 <!-- =====================================================================
      GREEN MAP  —  1 file duy nhất, chạy trên GitHub Pages
 
@@ -26,7 +32,8 @@
   --g900:#14532d; --g700:#1f7a3d; --g500:#2e9e4f; --g100:#e8f5ea;
   --ink:#123021; --mut:#5b7a66; --paper:#f4faf5; --line:#dde9de;
   --radius:16px; --wrap:1200px;
-  --font: system-ui,"Segoe UI",Roboto,Arial,sans-serif;
+  --font: "Be Vietnam Pro", system-ui,"Segoe UI",Roboto,Arial,sans-serif;
+  --font-display: "Be Vietnam Pro", system-ui, sans-serif;
   --ease: cubic-bezier(.22,.9,.3,1);
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -77,6 +84,7 @@ header.stuck{box-shadow:0 4px 18px rgba(20,83,45,.09)}
 .hero-txt>*:nth-child(4){animation-delay:.24s}
 .hero-txt>*:nth-child(5){animation-delay:.32s}
 .hero-h1{font-size:clamp(40px,6.2vw,82px);font-weight:900;line-height:1;
+         font-family:var(--font-display);
          color:var(--g900);letter-spacing:-.025em}
 .hero-h2{font-size:clamp(16px,2.35vw,31px);font-weight:800;color:var(--g700);
          text-transform:uppercase;margin-top:.35em;line-height:1.2}
@@ -378,6 +386,7 @@ footer{background:var(--g900);color:#d9efdd;padding:28px 0;text-align:center;fon
 <script>
 const DATA = {
   brand: "GREEN MAP",
+  font: '"Be Vietnam Pro", system-ui, sans-serif',
   footer: "© 2026 Green Map — THCS Võ Trường Toản",
   hero: {
     image:"assets/hero-photo.webp",
@@ -734,6 +743,20 @@ addEventListener("keydown", e => { if(e.key === "Escape") closeScanner(); });
 
 /* ================= KÉO-THẢ (GrapesJS) ================= */
 let gjsEditor = null, gjsPageKey = null, gjsCSSUrl = null;
+
+/* Font dùng được trong trình kéo-thả. Thêm font mới:
+   1. thêm dòng vào FONTS
+   2. thêm tên font vào thẻ <link id="gm-fonts"> trên đầu file */
+const FONTS = [
+  { value:'"Be Vietnam Pro", system-ui, sans-serif', name:"Be Vietnam Pro (mặc định)" },
+  { value:'Nunito, system-ui, sans-serif',           name:"Nunito (tròn, thân thiện)" },
+  { value:'Lora, Georgia, serif',                    name:"Lora (có chân, cổ điển)" },
+  { value:'"Roboto Slab", Georgia, serif',           name:"Roboto Slab (chân vuông)" },
+  { value:'system-ui, "Segoe UI", Roboto, sans-serif', name:"Hệ thống (nhanh nhất)" },
+  { value:'Georgia, "Times New Roman", serif',       name:"Georgia" },
+  { value:'"Courier New", monospace',                name:"Courier (máy chữ)" }
+];
+const FONT_CSS_URL = document.getElementById("gm-fonts")?.href || "";
 const GJS_CSS = [
   "https://cdn.jsdelivr.net/npm/grapesjs@0.21.9/dist/css/grapes.min.css",
   "https://unpkg.com/grapesjs@0.21.9/dist/css/grapes.min.css"
@@ -792,7 +815,7 @@ async function openBuilder(key){
     fromElement: false,
     storageManager: false,
     components: startHTML,
-    canvas: { styles: [ gjsCSSUrl ] },
+    canvas: { styles: [ FONT_CSS_URL, gjsCSSUrl ].filter(Boolean) },
     deviceManager: {
       devices: [
         { id:"desktop", name:"Desktop", width:"" },
@@ -826,6 +849,21 @@ async function openBuilder(key){
     panels: { defaults: [] }
   });
 
+  /* nhồi danh sách font vào ô Typography > Font của Style Manager */
+  const applyFonts = () => {
+    try{
+      const sm = gjsEditor.StyleManager;
+      const prop = sm.getProperty("typography","font-family");
+      if(prop){
+        /* GrapesJS đổi key giữa các bản (value/name ↔ id/label) nên đưa cả hai */
+        prop.set("options", FONTS.map(f => ({
+          value:f.value, name:f.name, id:f.value, label:f.name
+        })));
+        sm.render();
+      }
+    }catch(e){}
+  };
+
   /* dự phòng: nếu vì lý do gì blob không vào, nhồi thẳng <style> vào iframe */
   const injectCSS = () => {
     const doc = gjsEditor?.Canvas?.getDocument?.();
@@ -834,10 +872,15 @@ async function openBuilder(key){
       st.id = "site-css"; st.textContent = siteCSS;
       doc.head.appendChild(st);
     }
+    if(doc && FONT_CSS_URL && !doc.getElementById("site-fonts")){
+      const lk = doc.createElement("link");
+      lk.id = "site-fonts"; lk.rel = "stylesheet"; lk.href = FONT_CSS_URL;
+      doc.head.appendChild(lk);
+    }
   };
   gjsEditor.on("canvas:frame:load", injectCSS);
-  gjsEditor.on("load", injectCSS);
-  setTimeout(injectCSS, 600);
+  gjsEditor.on("load", () => { injectCSS(); applyFonts(); });
+  setTimeout(() => { injectCSS(); applyFonts(); }, 600);
 }
 
 function gjsDevice(d){ if(gjsEditor) gjsEditor.setDevice(d === "mobile" ? "Mobile" : "Desktop"); }
@@ -891,6 +934,23 @@ function setField(path, value){
   lsSet(JSON.stringify(DRAFT));
 }
 
+function setFont(v){
+  DRAFT.font = v;
+  lsSet(JSON.stringify(DRAFT));
+  document.documentElement.style.setProperty("--font", v);
+  document.documentElement.style.setProperty("--font-display", v);
+  toast("Đã đổi font — nhớ Tải data.json để lưu");
+}
+
+/* áp font đã lưu khi trang khởi động */
+function applySiteFont(){
+  const v = CONFIG.font;
+  if(v){
+    document.documentElement.style.setProperty("--font", v);
+    document.documentElement.style.setProperty("--font-display", v);
+  }
+}
+
 function adminPage(){
   DRAFT = DRAFT || JSON.parse(JSON.stringify(CONFIG));
   const h = DRAFT.hero;
@@ -919,6 +979,16 @@ function adminPage(){
         <div class="cols">
           ${F("Tên thương hiệu","brand",DRAFT.brand)}
           ${F("Chân trang","footer",DRAFT.footer)}
+        </div>
+        <div class="fld">
+          <label>Font chữ toàn site</label>
+          <select onchange="setFont(this.value)" style="width:100%;border:1px solid var(--line);
+                  border-radius:10px;padding:10px 12px;font-size:15px;background:#fff">
+            ${FONTS.map(f => `<option value='${esc(f.value)}'
+              ${ (DRAFT.font||FONTS[0].value) === f.value ? "selected" : "" }
+              style="font-family:${f.value}">${esc(f.name)}</option>`).join("")}
+          </select>
+          <div class="imgstatus">Áp dụng ngay để xem thử. Font đã có sẵn tiếng Việt.</div>
         </div>
       </div>
     </details>
@@ -1163,7 +1233,7 @@ function adminExport(){
 }
 function adminApply(){
   CONFIG = JSON.parse(JSON.stringify(DRAFT));
-  paintShell(); location.hash = "#/";
+  applySiteFont(); paintShell(); location.hash = "#/";
   toast("Đang xem thử bản nháp");
 }
 function adminReset(){
@@ -1309,6 +1379,7 @@ $("#burger").onclick = () => $("#menu").classList.toggle("open");
   }catch(e){}
   const draft = lsGet();
   if(draft){ try{ DRAFT = JSON.parse(draft); }catch(e){ lsDel(); } }
+  applySiteFont();
   paintShell();
   router();
 })();
