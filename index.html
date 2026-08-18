@@ -281,6 +281,17 @@ footer{background:var(--g900);color:#d9efdd;padding:28px 0;text-align:center;fon
      padding:9px 11px;font-size:14.5px}
 .minirow input:focus,.minirow textarea:focus{outline:0;border-color:var(--g500)}
 
+/* -- Kéo-thả (GrapesJS) -- */
+#builder{position:fixed;inset:0;z-index:150;background:#fff;display:none;flex-direction:column}
+#builder.on{display:flex}
+.bd-top{display:flex;align-items:center;gap:10px;padding:10px 16px;
+        background:var(--g900);color:#fff;flex:none}
+.bd-top b{font-size:15px}
+#gjs{flex:1;min-height:0}
+/* GrapesJS mặc định co block ngang — thu gọn panel phải cho gọn */
+.gjs-pn-views-container{width:230px!important}
+.gjs-cv-canvas{width:calc(100% - 230px)!important}
+
 /* ================= MOBILE ================= */
 @media(max-width:880px){
   .menu{display:none;position:absolute;top:72px;left:0;right:0;background:#fff;
@@ -341,6 +352,16 @@ footer{background:var(--g900);color:#d9efdd;padding:28px 0;text-align:center;fon
   </div>
 </div>
 
+<div id="builder">
+  <div class="bd-top noprint">
+    <b id="bdTitle">Kéo-thả</b>
+    <span style="flex:1"></span>
+    <button class="btn ghost sm" onclick="closeBuilder()">Huỷ</button>
+    <button class="btn sm" onclick="saveBuilder()">💾 Lưu</button>
+  </div>
+  <div id="gjs"></div>
+</div>
+
 <footer id="foot"></footer>
 
 <!-- =====================================================================
@@ -364,6 +385,10 @@ const DATA = {
     "Không có QR? Vào Danh sách cây và tìm theo tên."
   ],
   guideImage: "assets/qr-scan.webp",
+  /* Nội dung 3 trang tĩnh dưới dạng HTML thô — chỉnh bằng công cụ kéo-thả ở #/admin.
+     Nếu để trống, site tự dựng từ hero/guide/about như bản cũ (fallback). */
+  pages: { home:"", guide:"", about:"" },
+
   about: {
     mission: "Dự án do học sinh thực hiện: khảo sát, chụp ảnh và gắn mã QR lên từng cây, kèm bản đồ trực quan giúp mọi người tra cứu nhanh thông tin loài cây.",
     stats: [
@@ -702,6 +727,106 @@ function closeScanner(){
 $("#scan").addEventListener("click", e => { if(e.target.id === "scan") closeScanner(); });
 addEventListener("keydown", e => { if(e.key === "Escape") closeScanner(); });
 
+/* ================= KÉO-THẢ (GrapesJS) ================= */
+let gjsEditor = null, gjsPageKey = null;
+const GJS_CSS = [
+  "https://cdn.jsdelivr.net/npm/grapesjs@0.21.9/dist/css/grapes.min.css",
+  "https://unpkg.com/grapesjs@0.21.9/dist/css/grapes.min.css"
+];
+const GJS_JS = [
+  "https://cdn.jsdelivr.net/npm/grapesjs@0.21.9/dist/grapes.min.js",
+  "https://unpkg.com/grapesjs@0.21.9/dist/grapes.min.js"
+];
+function loadLink(href){
+  return new Promise((ok,err)=>{
+    const l = document.createElement("link");
+    l.rel = "stylesheet"; l.href = href; l.onload = ok; l.onerror = () => err(new Error(href));
+    document.head.appendChild(l);
+  });
+}
+async function loadGJS(){
+  if(window.grapesjs) return;
+  for(const u of GJS_CSS){ try{ await loadLink(u); break; }catch(e){} }
+  for(const u of GJS_JS){ try{ await loadScript(u); if(window.grapesjs) return; }catch(e){} }
+  if(!window.grapesjs) throw new Error("no-gjs");
+}
+
+const PAGE_TITLES = { home:"Trang chủ", guide:"Hướng dẫn", about:"Về dự án" };
+
+async function openBuilder(key){
+  gjsPageKey = key;
+  $("#bdTitle").textContent = "Kéo-thả — " + PAGE_TITLES[key];
+  $("#builder").classList.add("on");
+  $("#gjs").innerHTML = '<div style="padding:40px;text-align:center;color:var(--mut)">Đang tải công cụ kéo-thả…</div>';
+
+  try{ await loadGJS(); }
+  catch{
+    $("#gjs").innerHTML = '<div style="padding:40px;text-align:center;color:#a33">'
+      + 'Không tải được công cụ kéo-thả từ CDN. Kiểm tra kết nối mạng rồi thử lại.'
+      + '<br><button class="btn ghost sm" style="margin-top:10px" onclick="openBuilder(\'' + key + '\')">Thử lại</button></div>';
+    return;
+  }
+
+  $("#gjs").innerHTML = "";
+  const page = PAGES[ key==="home" ? "/" : key==="guide" ? "/huong-dan" : "/du-an" ];
+  const startHTML = DRAFT.pages?.[key] || page.defaultHTML();
+
+  gjsEditor = grapesjs.init({
+    container: "#gjs",
+    height: "100%",
+    fromElement: false,
+    storageManager: false,
+    components: startHTML,
+    canvas: { styles: [ location.href.split("#")[0] ] },
+    blockManager: {
+      appendTo: "#gjs",
+      blocks: [
+        { id:"text", label:"Đoạn văn", category:"Cơ bản",
+          content:'<p style="margin:10px 0">Nội dung mới…</p>' },
+        { id:"heading", label:"Tiêu đề", category:"Cơ bản",
+          content:'<h1 style="color:#14532d">Tiêu đề</h1>' },
+        { id:"image", label:"Hình ảnh", category:"Cơ bản",
+          content:{ type:"image", style:{ "max-width":"100%" } } },
+        { id:"button", label:"Nút bấm", category:"Cơ bản",
+          content:'<a class="btn" href="#/danh-sach">Nút bấm</a>' },
+        { id:"section", label:"Khối (div)", category:"Bố cục",
+          content:'<div style="padding:20px;min-height:60px;border:1px dashed #cfe6d4">Khối nội dung — kéo thêm thứ khác vào đây</div>' },
+        { id:"row2", label:"2 cột", category:"Bố cục",
+          content:'<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px"><div style="min-height:60px;border:1px dashed #cfe6d4;padding:14px">Cột 1</div><div style="min-height:60px;border:1px dashed #cfe6d4;padding:14px">Cột 2</div></div>' },
+        { id:"stat", label:"Ô số liệu", category:"Green Map",
+          content:'<div class="stat" style="display:inline-block;margin:6px"><div class="stat-num">12</div><div class="stat-label">Nhãn</div></div>' }
+      ]
+    },
+    layerManager: { appendTo: "#gjs" },
+    selectorManager: { appendTo: "#gjs" },
+    panels: { defaults: [] }
+  });
+}
+
+function saveBuilder(){
+  if(!gjsEditor || !gjsPageKey) return;
+  const html = gjsEditor.getHtml();
+  const css  = gjsEditor.getCss();
+  DRAFT.pages = DRAFT.pages || {};
+  DRAFT.pages[gjsPageKey] = css ? ("<style>" + css + "</style>\n" + html) : html;
+  lsSet(JSON.stringify(DRAFT));
+  closeBuilder();
+  toast("Đã lưu bản kéo-thả cho trang " + PAGE_TITLES[gjsPageKey]);
+  if(location.hash === "#/admin") router();
+}
+function closeBuilder(){
+  $("#builder").classList.remove("on");
+  if(gjsEditor){ gjsEditor.destroy(); gjsEditor = null; }
+  gjsPageKey = null;
+}
+function clearPageHTML(key){
+  if(!confirm("Xoá bản kéo-thả và quay về nội dung từ form?")) return;
+  if(DRAFT.pages) DRAFT.pages[key] = "";
+  lsSet(JSON.stringify(DRAFT));
+  router();
+  toast("Đã xoá bản kéo-thả");
+}
+
 /* ================= ADMIN ================= */
 let DRAFT = null;
 const LS_KEY = "greenmap-draft";
@@ -761,6 +886,7 @@ function adminPage(){
     <details class="acc">
       <summary>🏠 Trang chủ / Hero ${imgTag(h.image)}</summary>
       <div class="body">
+        <button class="btn ghost sm" onclick="openBuilder('home')" style="margin-bottom:14px">🖱️ Sửa bằng kéo-thả</button>
         <div class="cols">
           ${F("Tiêu đề lớn","hero.h1",h.h1)}
           ${F("Phụ đề","hero.h2",h.h2)}
@@ -771,20 +897,30 @@ function adminPage(){
         </div>
         ${F("Mô tả ngắn","hero.lead",h.lead,"area")}
         ${F("Chữ trên nút","hero.cta",h.cta)}
+        ${DRAFT.pages?.home ? `<div class="adm-note" style="margin-top:12px">
+          ⚠️ Trang này đang dùng bản kéo-thả đã lưu — sửa ô chữ ở trên sẽ <b>không</b> hiện ra
+          cho tới khi bạn xoá bản kéo-thả. <button class="btn ghost sm" onclick="clearPageHTML('home')">Xoá bản kéo-thả, dùng lại form</button>
+        </div>` : ""}
       </div>
     </details>
 
     <details class="acc">
       <summary>📖 Hướng dẫn ${imgTag(DRAFT.guideImage)}</summary>
       <div class="body">
+        <button class="btn ghost sm" onclick="openBuilder('guide')" style="margin-bottom:14px">🖱️ Sửa bằng kéo-thả</button>
         ${F("Các bước (mỗi dòng 1 bước)","guide",(DRAFT.guide||[]).join("\n"),"area")}
         ${imgField("Ảnh minh hoạ","guideImage",DRAFT.guideImage||"")}
+        ${DRAFT.pages?.guide ? `<div class="adm-note" style="margin-top:12px">
+          ⚠️ Trang này đang dùng bản kéo-thả đã lưu.
+          <button class="btn ghost sm" onclick="clearPageHTML('guide')">Xoá bản kéo-thả, dùng lại form</button>
+        </div>` : ""}
       </div>
     </details>
 
     <details class="acc">
       <summary>🌱 Về dự án</summary>
       <div class="body">
+        <button class="btn ghost sm" onclick="openBuilder('about')" style="margin-bottom:14px">🖱️ Sửa bằng kéo-thả</button>
         ${F("Mô tả sứ mệnh","about.mission",DRAFT.about?.mission||"","area")}
 
         <label style="display:block;font-size:12.5px;font-weight:800;color:var(--g700);
@@ -796,6 +932,10 @@ function adminPage(){
                text-transform:uppercase;letter-spacing:.04em;margin:18px 0 6px">Quy trình thực hiện</label>
         <div id="tlList">${(DRAFT.about?.timeline||[]).map(tlRow).join("")}</div>
         <button class="btn ghost sm" onclick="addTl()">＋ Thêm bước</button>
+        ${DRAFT.pages?.about ? `<div class="adm-note" style="margin-top:12px">
+          ⚠️ Trang này đang dùng bản kéo-thả đã lưu.
+          <button class="btn ghost sm" onclick="clearPageHTML('about')">Xoá bản kéo-thả, dùng lại form</button>
+        </div>` : ""}
       </div>
     </details>
 
@@ -1045,7 +1185,7 @@ function adminReset(){
 const PAGES = {
   "/": {
     label:"Trang chủ", title:"Green Map", inMenu:true,
-    render(){ const h = CONFIG.hero; return `
+    defaultHTML(){ const h = CONFIG.hero; return `
       <section class="hero">
         <svg class="leaf" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true">
           <path d="M96 6C58 8 30 24 18 48 12 60 12 74 18 86c2-16 8-29 18-39 9-9 21-16 35-20-13 7-24 16-31 27-6 9-9 20-9 32C60 82 92 50 96 6z"/>
@@ -1072,12 +1212,13 @@ const PAGES = {
         <div class="grid">${CONFIG.trees.slice(0,4).map(cardHTML).join("")}</div>
         <p style="margin-top:22px"><a href="#/danh-sach" style="color:var(--g700);font-weight:700">Xem tất cả →</a></p>
       </div>`;
-    }
+    },
+    render(){ return CONFIG.pages?.home || this.defaultHTML(); }
   },
 
   "/huong-dan": {
     label:"Hướng dẫn", title:"Hướng dẫn — Green Map", inMenu:true,
-    render(){ return `
+    defaultHTML(){ return `
       <div class="wrap page">
         <h1>Hướng dẫn</h1>
         <div class="sub">${(CONFIG.guide||[]).length} bước để tra cứu một cây trong trường.</div>
@@ -1087,7 +1228,8 @@ const PAGES = {
              style="border-radius:var(--radius)" onerror="this.remove()">` : ""}
         </div>
       </div>`;
-    }
+    },
+    render(){ return CONFIG.pages?.guide || this.defaultHTML(); }
   },
 
   "/danh-sach": {
@@ -1103,7 +1245,7 @@ const PAGES = {
 
   "/du-an": {
     label:"Về dự án", title:"Về dự án — Green Map", inMenu:true,
-    render(){ const a = CONFIG.about || {}; return `
+    defaultHTML(){ const a = CONFIG.about || {}; return `
       <div class="wrap page">
         <h1>Về dự án</h1>
         <div class="sub">Số hoá cây xanh trong khuôn viên ${esc(CONFIG.hero.school)}.</div>
@@ -1132,7 +1274,8 @@ const PAGES = {
             </div>`).join("")}
         </div>` : ""}
       </div>`;
-    }
+    },
+    render(){ return CONFIG.pages?.about || this.defaultHTML(); }
   },
 
   "/qr": {
