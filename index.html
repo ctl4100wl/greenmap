@@ -222,6 +222,37 @@ header.stuck{box-shadow:0 4px 18px rgba(20,83,45,.09)}
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--g900);color:#fff;
        padding:12px 22px;border-radius:999px;font-weight:700;z-index:200;animation:popIn .3s var(--ease)}
 
+/* -- quản lý ảnh -- */
+.tag.img-tag{padding:2px 8px;border-radius:6px;background:var(--paper)}
+.tag.img-tag.ok{color:#1f7a3d;background:#e3f5e6}
+.tag.img-tag.bad{color:#a33;background:#fbe7e7}
+
+.imgfield{display:flex;gap:12px;align-items:flex-start}
+.imgprev{flex:none;width:88px;height:66px;border-radius:10px;overflow:hidden;
+         background:var(--paper);border:1px solid var(--line)}
+.imgprev img{width:100%;height:100%;object-fit:cover}
+.imgph{width:100%;height:100%;display:grid;place-items:center;font-size:11px;color:var(--mut);text-align:center;padding:4px}
+.imgctrl{flex:1;min-width:0}
+.imgstatus{font-size:12.5px;margin-top:4px;color:var(--mut)}
+.imgstatus.ok{color:#1f7a3d;font-weight:700}
+.imgstatus.bad{color:#c0392b;font-weight:700}
+
+.imglist{display:flex;flex-direction:column;gap:10px;margin-bottom:10px}
+.imglist .imgfield{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px}
+.rmimg{flex:none;align-self:center;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);
+       background:#fff;color:#c0392b;cursor:pointer;font-size:14px;transition:background .2s}
+.rmimg:hover{background:#fbe7e7}
+
+.asset-grid{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+.asset-item{display:flex;gap:14px;align-items:flex-start;border:1px solid var(--line);
+            border-radius:14px;padding:14px;background:#fff;animation:popIn .3s var(--ease) both}
+.asset-item .imgprev{width:96px;height:72px}
+.asset-body{flex:1;min-width:0}
+.asset-label{font-size:13px;font-weight:800;color:var(--g900);margin-bottom:6px}
+.asset-body input{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px 11px;
+                   font-size:14px;font-family:monospace}
+.asset-body input:focus{outline:0;border-color:var(--g500)}
+
 footer{background:var(--g900);color:#d9efdd;padding:28px 0;text-align:center;font-size:14px;margin-top:40px}
 
 /* ================= MOBILE ================= */
@@ -652,9 +683,7 @@ function setField(path, value){
   let o = DRAFT;
   for(let i=0;i<parts.length-1;i++) o = o[parts[i]];
   const last = parts[parts.length-1];
-  o[last] = (last === "imgs" || last === "guide")
-    ? value.split("\n").map(s=>s.trim()).filter(Boolean)
-    : value;
+  o[last] = (last === "guide") ? value.split("\n").map(s=>s.trim()).filter(Boolean) : value;
   lsSet(JSON.stringify(DRAFT));
 }
 
@@ -664,12 +693,13 @@ function adminPage(){
   return `
   <div class="wrap page">
     <h1>Bảng quản trị</h1>
-    <div class="sub">Sửa nội dung bằng form, không cần đụng vào code.</div>
+    <div class="sub">Sửa nội dung và tên file ảnh bằng form, không cần đụng vào code.</div>
 
     <div class="adm-bar noprint">
       <button class="btn" onclick="adminExport()">⬇️ Tải data.json</button>
       <button class="btn ghost" onclick="adminApply()">👁️ Xem thử trên site</button>
       <button class="btn ghost" onclick="adminReset()">↩️ Về bản gốc</button>
+      <a class="btn ghost" href="#/assets">🖼️ Quản lý ảnh</a>
       <a class="btn ghost" href="#/qr">🔳 Trang QR</a>
     </div>
 
@@ -680,19 +710,25 @@ function adminPage(){
     </div>
 
     <details class="acc" open>
-      <summary>⚙️ Chung &amp; Hero</summary>
+      <summary>⚙️ Chung</summary>
       <div class="body">
         <div class="cols">
           ${F("Tên thương hiệu","brand",DRAFT.brand)}
           ${F("Chân trang","footer",DRAFT.footer)}
         </div>
+      </div>
+    </details>
+
+    <details class="acc">
+      <summary>🏠 Trang chủ / Hero ${imgTag(h.image)}</summary>
+      <div class="body">
         <div class="cols">
           ${F("Tiêu đề lớn","hero.h1",h.h1)}
           ${F("Phụ đề","hero.h2",h.h2)}
         </div>
         <div class="cols">
           ${F("Tên trường","hero.school",h.school)}
-          ${F("Ảnh hero","hero.image",h.image)}
+          ${imgField("Ảnh nền hero","hero.image",h.image)}
         </div>
         ${F("Mô tả ngắn","hero.lead",h.lead,"area")}
         ${F("Chữ trên nút","hero.cta",h.cta)}
@@ -700,11 +736,17 @@ function adminPage(){
     </details>
 
     <details class="acc">
-      <summary>📖 Hướng dẫn &amp; Về dự án</summary>
+      <summary>📖 Hướng dẫn ${imgTag(DRAFT.guideImage)}</summary>
       <div class="body">
         ${F("Các bước (mỗi dòng 1 bước)","guide",(DRAFT.guide||[]).join("\n"),"area")}
-        ${F("Ảnh minh hoạ","guideImage",DRAFT.guideImage||"")}
-        ${F("Về dự án","about",DRAFT.about||"","area")}
+        ${imgField("Ảnh minh hoạ","guideImage",DRAFT.guideImage||"")}
+      </div>
+    </details>
+
+    <details class="acc">
+      <summary>🌱 Về dự án</summary>
+      <div class="body">
+        ${F("Nội dung","about",DRAFT.about||"","area")}
       </div>
     </details>
 
@@ -714,11 +756,102 @@ function adminPage(){
   </div>`;
 }
 
+/* nhãn nhỏ cạnh tiêu đề accordion */
+function imgTag(src){
+  return src ? `<span class="tag">1 ảnh</span>` : `<span class="tag">chưa có ảnh</span>`;
+}
+
+/* ô nhập đường dẫn ảnh + xem trước + báo lỗi nếu file không tồn tại */
+function imgField(label, path, val){
+  const id = "img_" + path.replace(/\./g,"_");
+  return `
+  <div class="fld">
+    <label>${label}</label>
+    <div class="imgfield">
+      <div class="imgprev" id="${id}_prev">
+        ${val ? `<img src="${esc(val)}" onerror="this.replaceWith(imgBroken())">` : imgBrokenHTML(true)}
+      </div>
+      <div class="imgctrl">
+        <input value="${esc(val)}" placeholder="assets/ten-file.webp"
+               oninput="setField('${path}', this.value); checkImg('${id}', this.value)">
+        <div class="imgstatus" id="${id}_status"></div>
+      </div>
+    </div>
+  </div>`;
+}
+const imgBrokenHTML = empty => `<div class="imgph">${empty ? "chưa có" : "⚠ lỗi"}</div>`;
+function imgBroken(){ const d=document.createElement("div"); d.className="imgph"; d.textContent="⚠ lỗi"; return d; }
+
+function checkImg(id, src){
+  const status = document.getElementById(id+"_status");
+  const prev = document.getElementById(id+"_prev");
+  if(!status) return;
+  if(!src){ status.textContent=""; prev.innerHTML = imgBrokenHTML(true); return; }
+  status.textContent = "Đang kiểm tra…"; status.className = "imgstatus";
+  const test = new Image();
+  test.onload = () => {
+    status.textContent = "✓ Ảnh tồn tại"; status.className = "imgstatus ok";
+    prev.innerHTML = `<img src="${esc(src)}">`;
+  };
+  test.onerror = () => {
+    status.textContent = "✗ Không tìm thấy file — kiểm tra lại tên/đuôi"; status.className = "imgstatus bad";
+    prev.innerHTML = imgBrokenHTML(false);
+  };
+  test.src = src + (src.includes("?") ? "&" : "?") + "chk=" + Date.now();
+}
+
+/* quét toàn bộ ảnh đang khai báo, kiểm tra hàng loạt cho tab "Ảnh" */
+function allImageRefs(){
+  const list = [];
+  if(DRAFT.hero.image) list.push({ label:"Hero — ảnh nền", path:"hero.image", src:DRAFT.hero.image });
+  if(DRAFT.guideImage) list.push({ label:"Hướng dẫn — ảnh minh hoạ", path:"guideImage", src:DRAFT.guideImage });
+  DRAFT.trees.forEach((t,i) => (t.imgs||[]).forEach((src,k) =>
+    list.push({ label:`${t.name||"(chưa đặt tên)"} — ảnh ${k+1}`, path:`trees.${i}.imgs.${k}`, src })));
+  return list;
+}
+
+function assetsPage(){
+  const refs = allImageRefs();
+  return `
+  <div class="wrap page">
+    <h1>Quản lý ảnh</h1>
+    <div class="sub">Toàn bộ ${refs.length} ảnh đang được site sử dụng. Sửa tên file sai ngay tại đây.</div>
+    <div class="adm-bar noprint">
+      <button class="btn" onclick="adminExport()">⬇️ Tải data.json</button>
+      <button class="btn ghost" onclick="checkAllImgs()">🔄 Kiểm tra lại toàn bộ</button>
+      <a class="btn ghost" href="#/admin">⚙️ Bảng quản trị</a>
+    </div>
+    <div class="asset-grid" id="assetGrid">
+      ${refs.map((r,i) => `
+        <div class="asset-item">
+          <div class="imgprev" id="a${i}_prev">
+            <img src="${esc(r.src)}" onerror="this.replaceWith(imgBroken())">
+          </div>
+          <div class="asset-body">
+            <div class="asset-label">${esc(r.label)}</div>
+            <input value="${esc(r.src)}"
+                   oninput="setField('${r.path}', this.value); checkImg('a${i}', this.value); refreshAssetLabel(${i})">
+            <div class="imgstatus" id="a${i}_status"></div>
+          </div>
+        </div>`).join("")}
+    </div>
+  </div>`;
+}
+function refreshAssetLabel(i){
+  const inp = $$("#assetGrid .asset-item")[i]?.querySelector("input");
+}
+function refreshHeroChecks(){
+  if(DRAFT.hero.image) checkImg("img_hero_image", DRAFT.hero.image);
+  if(DRAFT.guideImage) checkImg("img_guideImage", DRAFT.guideImage);
+}
+function checkAllImgs(){ allImageRefs().forEach((r,i) => checkImg("a"+i, r.src)); }
+
+
 function treeEditor(t, i){ return `
   <details class="acc">
     <summary>
       ${i+1}. ${esc(t.name) || "(chưa đặt tên)"}
-      <span class="tag">${t.imgs.length} ảnh</span>
+      <span class="tag">${(t.imgs||[]).length} ảnh</span>
       <span class="rowbtn" onclick="event.preventDefault();event.stopPropagation()">
         <button onclick="moveTree(${i},-1)" title="Lên">↑</button>
         <button onclick="moveTree(${i},1)" title="Xuống">↓</button>
@@ -735,7 +868,25 @@ function treeEditor(t, i){ return `
         ${F("Tên gọi khác","trees."+i+".alias",t.alias||"")}
       </div>
       ${F("Slug (đường dẫn QR — đổi là QR cũ chết)","trees."+i+".slug",t.slug)}
-      ${F("Ảnh (mỗi dòng 1 đường dẫn)","trees."+i+".imgs",(t.imgs||[]).join("\n"),"area")}
+
+      <label style="display:block;font-size:12.5px;font-weight:800;color:var(--g700);
+             text-transform:uppercase;letter-spacing:.04em;margin:14px 0 6px">Ảnh (${(t.imgs||[]).length})</label>
+      <div class="imglist">
+        ${(t.imgs||[]).map((src,k) => `
+          <div class="imgfield">
+            <div class="imgprev" id="t${i}_${k}_prev">
+              <img src="${esc(src)}" onerror="this.replaceWith(imgBroken())">
+            </div>
+            <div class="imgctrl">
+              <input value="${esc(src)}" placeholder="assets/ten-file.webp"
+                     oninput="setTreeImg(${i},${k},this.value)">
+              <div class="imgstatus" id="t${i}_${k}_status"></div>
+            </div>
+            <button class="rmimg" onclick="delTreeImg(${i},${k})" title="Xoá ảnh này">✕</button>
+          </div>`).join("") || `<div class="hint">Chưa có ảnh nào.</div>`}
+      </div>
+      <button class="btn ghost sm" onclick="addTreeImg(${i})">＋ Thêm ảnh</button>
+
       ${F("Đặc điểm nhận biết","trees."+i+".desc",t.desc||"","area")}
       ${F("Công dụng","trees."+i+".uses",t.uses||"","area")}
       ${F("Giá trị sinh thái","trees."+i+".eco",t.eco||"","area")}
@@ -743,6 +894,21 @@ function treeEditor(t, i){ return `
       ${F("Nhãn mục thú vị (để trống = “Điều thú vị”)","trees."+i+".funLabel",t.funLabel||"")}
     </div>
   </details>`;
+}
+
+function setTreeImg(i,k,val){
+  DRAFT.trees[i].imgs[k] = val;
+  lsSet(JSON.stringify(DRAFT));
+  checkImg(`t${i}_${k}`, val);
+}
+function addTreeImg(i){
+  DRAFT.trees[i].imgs = DRAFT.trees[i].imgs || [];
+  DRAFT.trees[i].imgs.push("assets/");
+  refreshEditor();
+}
+function delTreeImg(i,k){
+  DRAFT.trees[i].imgs.splice(k,1);
+  refreshEditor();
 }
 
 function refreshEditor(){
@@ -870,7 +1036,10 @@ const PAGES = {
     }
   },
 
-  "/admin": { label:"Admin", title:"Quản trị — Green Map", inMenu:false, render: adminPage }
+  "/admin": { label:"Admin", title:"Quản trị — Green Map", inMenu:false, render: adminPage,
+              after: refreshHeroChecks },
+  "/assets": { label:"Ảnh", title:"Quản lý ảnh — Green Map", inMenu:false, render: assetsPage,
+               after: checkAllImgs }
 };
 
 /* ================= ROUTER ================= */
