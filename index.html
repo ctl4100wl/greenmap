@@ -6,7 +6,7 @@
 <title>Green Map — THCS Võ Trường Toản</title>
 
 <!-- =====================================================================
-     GREEN MAP
+     GREEN MAP  —  1 file duy nhất, chạy trên GitHub Pages
 
      TRANG
        #/            Trang chủ            #/cay/<slug>  Chi tiết 1 loài
@@ -255,6 +255,32 @@ header.stuck{box-shadow:0 4px 18px rgba(20,83,45,.09)}
 
 footer{background:var(--g900);color:#d9efdd;padding:28px 0;text-align:center;font-size:14px;margin-top:40px}
 
+/* ---- trang Về dự án ---- */
+.about-mission{font-size:18px;color:#2c4a37;max-width:52em;margin-bottom:8px}
+.stat-row{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin:34px 0}
+.stat{border:1px solid var(--line);border-radius:var(--radius);padding:22px 18px;text-align:center;
+      background:var(--paper);transition:transform .25s var(--ease),box-shadow .25s var(--ease)}
+.stat:hover{transform:translateY(-4px);box-shadow:0 10px 24px rgba(20,83,45,.12)}
+.stat-num{font-size:clamp(28px,4vw,40px);font-weight:900;color:var(--g700);line-height:1}
+.stat-label{font-size:13.5px;color:var(--mut);margin-top:6px;text-transform:uppercase;letter-spacing:.04em}
+
+.tl{position:relative;margin-top:18px;padding-left:8px}
+.tl::before{content:"";position:absolute;left:19px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.tl-item{position:relative;display:flex;gap:18px;padding:0 0 28px}
+.tl-item:last-child{padding-bottom:0}
+.tl-dot{flex:none;width:40px;height:40px;border-radius:50%;background:var(--g500);color:#fff;
+        display:grid;place-items:center;font-weight:800;font-size:15px;z-index:1;
+        box-shadow:0 0 0 5px #fff}
+.tl-body{padding-top:6px}
+.tl-step{font-weight:800;color:var(--g900);font-size:16.5px}
+.tl-text{color:var(--mut);font-size:14.5px;margin-top:3px;max-width:38em}
+
+/* -- admin: hàng nhỏ có nút xoá -- */
+.minirow{display:flex;gap:8px;margin-bottom:8px}
+.minirow input,.minirow textarea{flex:1;border:1px solid var(--line);border-radius:10px;
+     padding:9px 11px;font-size:14.5px}
+.minirow input:focus,.minirow textarea:focus{outline:0;border-color:var(--g500)}
+
 /* ================= MOBILE ================= */
 @media(max-width:880px){
   .menu{display:none;position:absolute;top:72px;left:0;right:0;background:#fff;
@@ -338,7 +364,20 @@ const DATA = {
     "Không có QR? Vào Danh sách cây và tìm theo tên."
   ],
   guideImage: "assets/qr-scan.webp",
-  about: "Dự án do học sinh thực hiện: khảo sát, chụp ảnh và gắn mã QR lên từng cây, kèm bản đồ trực quan giúp mọi người tra cứu nhanh thông tin loài cây.",
+  about: {
+    mission: "Dự án do học sinh thực hiện: khảo sát, chụp ảnh và gắn mã QR lên từng cây, kèm bản đồ trực quan giúp mọi người tra cứu nhanh thông tin loài cây.",
+    stats: [
+      { num:"12", label:"Loài cây" },
+      { num:"24+", label:"Ảnh tư liệu" },
+      { num:"1", label:"Trường học" }
+    ],
+    timeline: [
+      { step:"Khảo sát", text:"Đi quanh trường, xác định và chụp ảnh từng loài cây." },
+      { step:"Biên soạn", text:"Tra cứu tên khoa học, đặc điểm, công dụng cho mỗi loài." },
+      { step:"Gắn QR", text:"In và dán mã QR lên thân cây, trỏ về trang thông tin." },
+      { step:"Ra mắt", text:"Công bố bản đồ trực tuyến cho toàn trường sử dụng." }
+    ]
+  },
 
   trees: [
     { slug:"bang-dai-loan", name:"Bàng Đài Loan", sci:"Terminalia mantaly",
@@ -746,7 +785,17 @@ function adminPage(){
     <details class="acc">
       <summary>🌱 Về dự án</summary>
       <div class="body">
-        ${F("Nội dung","about",DRAFT.about||"","area")}
+        ${F("Mô tả sứ mệnh","about.mission",DRAFT.about?.mission||"","area")}
+
+        <label style="display:block;font-size:12.5px;font-weight:800;color:var(--g700);
+               text-transform:uppercase;letter-spacing:.04em;margin:16px 0 6px">Số liệu nổi bật</label>
+        <div id="statList">${(DRAFT.about?.stats||[]).map(statRow).join("")}</div>
+        <button class="btn ghost sm" onclick="addStat()">＋ Thêm số liệu</button>
+
+        <label style="display:block;font-size:12.5px;font-weight:800;color:var(--g700);
+               text-transform:uppercase;letter-spacing:.04em;margin:18px 0 6px">Quy trình thực hiện</label>
+        <div id="tlList">${(DRAFT.about?.timeline||[]).map(tlRow).join("")}</div>
+        <button class="btn ghost sm" onclick="addTl()">＋ Thêm bước</button>
       </div>
     </details>
 
@@ -845,6 +894,50 @@ function refreshHeroChecks(){
   if(DRAFT.guideImage) checkImg("img_guideImage", DRAFT.guideImage);
 }
 function checkAllImgs(){ allImageRefs().forEach((r,i) => checkImg("a"+i, r.src)); }
+
+/* -- About: số liệu nổi bật -- */
+function statRow(s,i){ return `
+  <div class="minirow">
+    <input placeholder="Số (12)" value="${esc(s.num)}" style="width:90px"
+           oninput="DRAFT.about.stats[${i}].num=this.value;lsSet(JSON.stringify(DRAFT))">
+    <input placeholder="Nhãn (Loài cây)" value="${esc(s.label)}"
+           oninput="DRAFT.about.stats[${i}].label=this.value;lsSet(JSON.stringify(DRAFT))">
+    <button class="rmimg" onclick="delStat(${i})" title="Xoá">✕</button>
+  </div>`;
+}
+function addStat(){
+  DRAFT.about = DRAFT.about || {}; DRAFT.about.stats = DRAFT.about.stats || [];
+  DRAFT.about.stats.push({ num:"", label:"" });
+  $("#statList").innerHTML = DRAFT.about.stats.map(statRow).join("");
+  lsSet(JSON.stringify(DRAFT));
+}
+function delStat(i){
+  DRAFT.about.stats.splice(i,1);
+  $("#statList").innerHTML = DRAFT.about.stats.map(statRow).join("");
+  lsSet(JSON.stringify(DRAFT));
+}
+
+/* -- About: quy trình thực hiện -- */
+function tlRow(t,i){ return `
+  <div class="minirow" style="align-items:flex-start">
+    <input placeholder="Tên bước" value="${esc(t.step)}" style="width:130px"
+           oninput="DRAFT.about.timeline[${i}].step=this.value;lsSet(JSON.stringify(DRAFT))">
+    <textarea placeholder="Mô tả" style="min-height:44px"
+              oninput="DRAFT.about.timeline[${i}].text=this.value;lsSet(JSON.stringify(DRAFT))">${esc(t.text)}</textarea>
+    <button class="rmimg" onclick="delTl(${i})" title="Xoá">✕</button>
+  </div>`;
+}
+function addTl(){
+  DRAFT.about = DRAFT.about || {}; DRAFT.about.timeline = DRAFT.about.timeline || [];
+  DRAFT.about.timeline.push({ step:"", text:"" });
+  $("#tlList").innerHTML = DRAFT.about.timeline.map(tlRow).join("");
+  lsSet(JSON.stringify(DRAFT));
+}
+function delTl(i){
+  DRAFT.about.timeline.splice(i,1);
+  $("#tlList").innerHTML = DRAFT.about.timeline.map(tlRow).join("");
+  lsSet(JSON.stringify(DRAFT));
+}
 
 
 function treeEditor(t, i){ return `
@@ -1010,11 +1103,34 @@ const PAGES = {
 
   "/du-an": {
     label:"Về dự án", title:"Về dự án — Green Map", inMenu:true,
-    render(){ return `
+    render(){ const a = CONFIG.about || {}; return `
       <div class="wrap page">
         <h1>Về dự án</h1>
         <div class="sub">Số hoá cây xanh trong khuôn viên ${esc(CONFIG.hero.school)}.</div>
-        <p class="reveal">${esc(CONFIG.about||"")}</p>
+
+        <p class="reveal about-mission">${esc(a.mission||"")}</p>
+
+        ${(a.stats||[]).length ? `
+        <div class="stat-row">
+          ${a.stats.map((s,i)=>`
+            <div class="stat reveal" style="transition-delay:${i*60}ms">
+              <div class="stat-num">${esc(s.num)}</div>
+              <div class="stat-label">${esc(s.label)}</div>
+            </div>`).join("")}
+        </div>` : ""}
+
+        ${(a.timeline||[]).length ? `
+        <h3>Quy trình thực hiện</h3>
+        <div class="tl">
+          ${a.timeline.map((t,i)=>`
+            <div class="tl-item reveal" style="transition-delay:${i*70}ms">
+              <div class="tl-dot">${i+1}</div>
+              <div class="tl-body">
+                <div class="tl-step">${esc(t.step)}</div>
+                <div class="tl-text">${esc(t.text)}</div>
+              </div>
+            </div>`).join("")}
+        </div>` : ""}
       </div>`;
     }
   },
@@ -1082,7 +1198,7 @@ addEventListener("hashchange", router);
 addEventListener("scroll", () => $("#hdr").classList.toggle("stuck", scrollY > 8), { passive:true });
 $("#burger").onclick = () => $("#menu").classList.toggle("open");
 
-
+/* nạp data.json nếu repo có, không thì dùng DATA gốc */
 (async function boot(){
   try{
     const r = await fetch("data.json?v=" + Date.now(), { cache:"no-store" });
