@@ -1,0 +1,217 @@
+{
+  "brand": "GREEN MAP",
+  "footer": "© 2026 Green Map — THCS Võ Trường Toản",
+  "hero": {
+    "image": "assets/hero-photo.webp",
+    "h1": "GREEN MAP",
+    "h2": "BẢN ĐỒ CÂY XANH TRONG TRƯỜNG",
+    "school": "THCS VÕ TRƯỜNG TOẢN",
+    "lead": "Khám phá và tìm hiểu hệ thống cây xanh trong khuôn viên trường thông qua bản đồ trực quan và mã QR.",
+    "cta": "🌳 KHÁM PHÁ CÂY XANH"
+  },
+  "guide": [
+    "Mở camera điện thoại, đưa vào mã QR gắn trên thân cây.",
+    "Bấm vào đường link hiện ra — trang thông tin của cây sẽ mở.",
+    "Không có QR? Vào Danh sách cây và tìm theo tên."
+  ],
+  "guideImage": "assets/qr-scan.webp",
+  "about": "Dự án do Đỗ Mạnh Khang và Nguyễn Minh Đăng thực hiện: khảo sát, chụp ảnh và gắn mã QR lên từng cây, kèm bản đồ trực quan giúp mọi người tra cứu nhanh thông tin loài cây.",
+  "trees": [
+    {
+      "slug": "bang-dai-loan",
+      "name": "Bàng Đài Loan",
+      "sci": "Terminalia mantaly",
+      "family": "Họ Bàng (Combretaceae)",
+      "alias": "",
+      "imgs": [
+        "assets/bang-dai-loan.webp",
+        "assets/bang-dai-loan2.webp"
+      ],
+      "desc": "Cây thân gỗ, tán mọc thành nhiều tầng, lá nhỏ, xanh, tạo dáng cây khá gọn và đẹp.",
+      "uses": "Tạo bóng mát, trang trí sân trường, công viên và đường phố.",
+      "eco": "Hấp thụ CO₂, tạo bóng mát, góp phần giảm nhiệt độ và cung cấp nơi trú ngụ cho một số sinh vật nhỏ.",
+      "fun": "Tại một số nơi, do nhu cầu nhân giống, người ta ghép cành bàng lá nhỏ lên gốc bàng ta (bàng lá lớn). Điều này tạo ra những cây có phần gốc màu đen xù xì và phần thân trên màu trắng sáng rất lạ mắt, được trẻ em gọi vui là “cây đi giày cao gót”.",
+      "funLabel": ""
+    },
+    {
+      "slug": "cay-dau",
+      "name": "Cây Dầu",
+      "sci": "Dipterocarpus alatus",
+      "family": "Họ Dầu (Dipterocarpaceae)",
+      "alias": "",
+      "imgs": [
+        "assets/cay-dau.webp",
+        "assets/cay-dau2.webp",
+        "assets/cay-dau3.webp"
+      ],
+      "desc": "Cây thân gỗ lớn, thân thẳng, có thể cao hàng chục mét; lá khá lớn; quả có hai cánh dài.",
+      "uses": "Lấy gỗ, trồng rừng, tạo bóng mát và làm cây cảnh quan.",
+      "eco": "Góp phần hấp thụ CO₂, giữ đất, tạo bóng mát và cung cấp nơi sống cho nhiều sinh vật.",
+      "fun": "Quả có hai cánh dài, giúp quả xoay và bay theo gió để phát tán hạt.",
+      "funLabel": ""
+    },
+    {
+      "slug": "bang-lang-tim",
+      "name": "Bằng lăng tím",
+      "sci": "Lagerstroemia speciosa",
+      "family": "Họ Bằng lăng (Lythraceae)",
+      "alias": "",
+      "imgs": [
+        "assets/bang-lang-tim.webp",
+        "assets/bang-lang-tim2.webp"
+      ],
+      "desc": "Cây thân gỗ, tán rộng; hoa màu tím hoặc tím hồng, thường mọc thành chùm lớn.",
+      "uses": "Tạo bóng mát, trang trí sân trường, đường phố và công viên.",
+      "eco": "Hoa cung cấp thức ăn cho một số côn trùng; cây hấp thụ CO₂ và giúp giảm nhiệt.",
+      "fun": "Hoa bằng lăng thường gắn với mùa hè và tuổi học trò, vì cây thường nở vào thời điểm kết thúc năm học.",
+      "funLabel": ""
+    },
+    {
+      "slug": "phuong-vy",
+      "name": "Phượng vĩ",
+      "sci": "Delonix regia",
+      "family": "Họ Đậu (Fabaceae)",
+      "alias": "",
+      "imgs": [
+        "assets/pvy.webp",
+        "assets/pvy2.webp"
+      ],
+      "desc": "Cây thân gỗ, tán rộng; lá kép nhỏ; hoa màu đỏ hoặc đỏ cam rất nổi bật.",
+      "uses": "Tạo bóng mát, làm đẹp sân trường, công viên và đường phố.",
+      "eco": "Hấp thụ CO₂, tạo bóng mát và cung cấp nguồn thức ăn cho một số loài côn trùng.",
+      "fun": "Phượng vĩ được gọi là “hoa học trò”, thường tượng trưng cho mùa hè, tuổi học sinh và những kỷ niệm cuối năm học.",
+      "funLabel": ""
+    },
+    {
+      "slug": "sa-ke",
+      "name": "Sa kê",
+      "sci": "Artocarpus altilis",
+      "family": "Họ Dâu tằm (Moraceae)",
+      "alias": "",
+      "imgs": [
+        "assets/sake.webp",
+        "assets/sake2.webp"
+      ],
+      "desc": "Cây thân gỗ, lá rất lớn, xanh bóng và thường xẻ thành nhiều thùy; quả có hình tròn hoặc hơi bầu dục.",
+      "uses": "Quả dùng làm thực phẩm; cây được trồng để tạo bóng mát và làm cảnh.",
+      "eco": "Tạo bóng mát, hấp thụ CO₂, cung cấp thức ăn cho con người và một số động vật.",
+      "fun": "Quả sa kê chứa nhiều tinh bột và có thể chế biến thành nhiều món ăn. Ở một số vùng nhiệt đới, sa kê là nguồn lương thực quan trọng.",
+      "funLabel": ""
+    },
+    {
+      "slug": "diep-vang",
+      "name": "Điệp vàng",
+      "sci": "Peltophorum pterocarpum",
+      "family": "Họ Đậu (Fabaceae)",
+      "alias": "",
+      "imgs": [
+        "assets/diepvang.webp",
+        "assets/diepvang2.webp"
+      ],
+      "desc": "Cây thân gỗ, tán rộng, lá kép nhỏ; hoa màu vàng tươi mọc thành những chùm lớn.",
+      "uses": "Tạo bóng mát, làm đẹp sân trường, công viên và đường phố.",
+      "eco": "Hoa thu hút ong, bướm và các côn trùng thụ phấn; cây hấp thụ CO₂ và góp phần giảm nhiệt.",
+      "fun": "Khi nở rộ, hoa vàng phủ kín tán cây tạo thành hình ảnh giống một “mái vòm vàng”. Cây còn được gọi là Yellow Flame Tree.",
+      "funLabel": ""
+    },
+    {
+      "slug": "but-tung",
+      "name": "Bút tùng",
+      "sci": "Podocarpus macrophyllus",
+      "family": "Họ Kim giao (Podocarpaceae)",
+      "alias": "",
+      "imgs": [
+        "assets/buttung.webp",
+        "assets/buttung2.webp"
+      ],
+      "desc": "Cây thường xanh, thân thẳng, lá dài và hẹp, màu xanh đậm; dáng cây gọn.",
+      "uses": "Trồng làm cảnh, tạo hàng cây, trang trí sân vườn và có thể tạo hình bonsai.",
+      "eco": "Góp phần tạo không gian xanh, hấp thụ CO₂ và giữ bụi trong môi trường.",
+      "fun": "Cây có dáng thẳng và lá dài, gợi liên tưởng đến một chiếc bút, nên được gọi là “bút tùng”.",
+      "funLabel": ""
+    },
+    {
+      "slug": "ngoc-lan",
+      "name": "Ngọc lan",
+      "sci": "Magnolia champaca",
+      "family": "Họ Mộc lan (Magnoliaceae)",
+      "alias": "",
+      "imgs": [
+        "assets/hoangoclan.webp",
+        "assets/hoangoclan2.webp"
+      ],
+      "desc": "Cây thân gỗ, lá xanh quanh năm, hoa thường có màu vàng nhạt hoặc vàng cam và rất thơm. Hoa có kích thước nhỏ nhưng mùi hương nổi bật.",
+      "uses": "Trồng làm cảnh, tạo bóng mát và lấy hoa để tạo hương thơm. Hoa cũng được sử dụng trong một số sản phẩm nước hoa và hương liệu.",
+      "eco": "Cây tạo bóng mát, hấp thụ CO₂ và hoa cung cấp nguồn thức ăn cho một số loài côn trùng.",
+      "fun": "Hoa ngọc lan nổi tiếng với mùi hương thơm đậm và dễ nhận biết, đặc biệt rõ hơn vào buổi tối. Trong văn hóa Việt Nam, ngọc lan thường gắn với hình ảnh sự thanh khiết và vẻ đẹp dịu dàng.",
+      "funLabel": ""
+    },
+    {
+      "slug": "xoai",
+      "name": "Xoài",
+      "sci": "Mangifera indica",
+      "family": "Họ Đào lộn hột (Anacardiaceae)",
+      "alias": "",
+      "imgs": [
+        "assets/xoai.webp",
+        "assets/xoai2.webp"
+      ],
+      "desc": "Cây thân gỗ lớn, tán rộng, lá dài và xanh đậm; quả có thịt mềm, vị chua hoặc ngọt tùy giống.",
+      "uses": "Cho quả làm thực phẩm, nước ép, sinh tố và nhiều món ăn; đồng thời tạo bóng mát.",
+      "eco": "",
+      "fun": "Sự tích cây xoài thần hổ 3 chân kể về cây xoài cổ thụ hơn 340 năm tuổi tại Bạc Liêu, gắn liền với giai thoại thời kỳ khai phá đất phương Nam.",
+      "funLabel": "Câu chuyện thú vị"
+    },
+    {
+      "slug": "cay-de",
+      "name": "Cây Đề",
+      "sci": "Ficus religiosa",
+      "family": "Họ Dâu tằm (Moraceae)",
+      "alias": "Còn gọi là cây Bồ đề",
+      "imgs": [
+        "assets/cayde1.webp",
+        "assets/cayde2.webp"
+      ],
+      "desc": "Cây thân gỗ lớn, tán rộng; lá có hình trái tim và phần chóp kéo dài, nhọn. Cây có thể phát triển rất lâu năm.",
+      "uses": "Làm cây bóng mát, cây cảnh và tạo không gian xanh. Cây thường được trồng ở chùa, đình và nơi công cộng.",
+      "eco": "Tán cây tạo nơi trú ngụ cho chim và nhiều sinh vật nhỏ; cây hấp thụ CO₂, tạo bóng mát và góp phần cải thiện môi trường.",
+      "fun": "Cây Đề có ý nghĩa đặc biệt trong văn hóa Phật giáo. Theo truyền thống, Đức Phật được cho là đã đạt giác ngộ dưới một cây Bồ đề, vì vậy cây thường được xem là biểu tượng của trí tuệ, sự giác ngộ và bình an.",
+      "funLabel": ""
+    },
+    {
+      "slug": "mong-bo",
+      "name": "Móng bò",
+      "sci": "Bauhinia purpurea",
+      "family": "Họ Đậu (Fabaceae)",
+      "alias": "",
+      "imgs": [
+        "assets/hoamongbo.webp",
+        "assets/hoamongbo2.webp"
+      ],
+      "desc": "Cây thân gỗ nhỏ hoặc trung bình, lá có hình dạng đặc biệt giống móng chân bò, hoa thường có màu tím, hồng hoặc trắng.",
+      "uses": "Trồng làm cảnh, tạo bóng mát và trang trí sân trường, công viên, đường phố.",
+      "eco": "Hoa thu hút ong, bướm và các loài côn trùng thụ phấn; cây tạo bóng mát và tăng độ đa dạng thực vật.",
+      "fun": "Đặc điểm dễ nhận biết nhất của cây là lá bị chẻ đôi ở đầu, trông giống móng bò. Chính hình dạng này đã tạo nên tên gọi “móng bò”.",
+      "funLabel": ""
+    },
+    {
+      "slug": "cay-si",
+      "name": "Cây si",
+      "sci": "Ficus benjamina",
+      "family": "Họ Dâu tằm (Moraceae)",
+      "alias": "",
+      "imgs": [
+        "assets/caysi.webp",
+        "assets/caysi2.webp"
+      ],
+      "desc": "Cây thân gỗ, tán rộng, lá nhỏ và xanh quanh năm. Cây có thể mọc nhiều rễ phụ từ cành xuống đất, tạo nên hình dáng đặc trưng.",
+      "uses": "Trồng cây cảnh, tạo bóng mát, trang trí sân trường, công viên. Cây cũng thường được tạo dáng bonsai.",
+      "eco": "Tán cây cung cấp nơi trú ngụ cho chim và các sinh vật nhỏ; cây hấp thụ CO₂, tạo bóng mát và góp phần làm xanh môi trường.",
+      "fun": "Cây si thuộc chi Ficus, nhóm cây nổi tiếng với hệ thống rễ phụ. Khi các rễ này phát triển xuống đất, chúng có thể tạo thành những “cột rễ” rất đặc biệt, khiến cây trông như có nhiều thân.",
+      "funLabel": ""
+    }
+  ],
+  "pages": {
+    "about": "<style>* { box-sizing: border-box; } body {margin: 0;}.reveal.about-mission{font-size:20px;font-family:Comic Sans MS, cursive, sans-serif;}#iwbf{margin:10px 0;}</style>\n<body id=\"iilw\"><div class=\"wrap page\"><h1>Về dự án</h1><div class=\"sub\">Số hoá cây xanh trong khuôn viên THCS VÕ TRƯỜNG TOẢN.</div><p class=\"reveal about-mission\">Dự án do Đỗ Mạnh Khang và Nguyễn Minh Đăng thực hiện</p></div><p id=\"iwbf\">Được làm bằng HTML/CSS/JS, GitHub Pages <br/>Library:<b> jscdn</b>: GrapesJS, webqr</p></body>"
+  }
+}
