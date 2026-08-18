@@ -1082,7 +1082,7 @@ addEventListener("hashchange", router);
 addEventListener("scroll", () => $("#hdr").classList.toggle("stuck", scrollY > 8), { passive:true });
 $("#burger").onclick = () => $("#menu").classList.toggle("open");
 
-/* nạp data.json nếu repo có, không thì dùng DATA gốc */
+
 (async function boot(){
   try{
     const r = await fetch("data.json?v=" + Date.now(), { cache:"no-store" });
