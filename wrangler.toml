@@ -1,0 +1,9 @@
+name = "greenmap"
+compatibility_date = "2026-08-19"
+
+[assets]
+directory = "./"
+
+[main]
+# This tells Cloudflare to execute this script file
+main = "./_worker.js" 
