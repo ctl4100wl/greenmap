@@ -1,7 +1,7 @@
 export default {
   async fetch(request, env) {
     // 1. The primary page you want people to visit
-    const PRIMARY_URL = "https://ctl4100wl.github.io/greenm3423423ap/"; //404 test
+    const PRIMARY_URL = "https://ctl4100wl.github.io/greenmap/"; 
     
     // 2. The backup link if your primary page goes 404
     const BACKUP_URL = "https://greenmap.asusmine1309.workers.dev/";
