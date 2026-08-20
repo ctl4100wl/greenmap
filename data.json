@@ -15,7 +15,7 @@
     "Không có QR? Vào Danh sách cây và tìm theo tên."
   ],
   "guideImage": "assets/qr-scan.webp",
-  "about": "Dự án do Đỗ Mạnh Khang và Nguyễn Minh Đăng thực hiện: khảo sát, chụp ảnh và gắn mã QR lên từng cây, kèm bản đồ trực quan giúp mọi người tra cứu nhanh thông tin loài cây.",
+  "about": "",
   "trees": [
     {
       "slug": "bang-dai-loan",
@@ -164,10 +164,10 @@
     },
     {
       "slug": "cay-de",
-      "name": "Cây Đề",
+      "name": "Cây Bồ Đề",
       "sci": "Ficus religiosa",
       "family": "Họ Dâu tằm (Moraceae)",
-      "alias": "Còn gọi là cây Bồ đề",
+      "alias": "",
       "imgs": [
         "assets/cayde1.webp",
         "assets/cayde2.webp"
@@ -210,9 +210,5 @@
       "fun": "Cây si thuộc chi Ficus, nhóm cây nổi tiếng với hệ thống rễ phụ. Khi các rễ này phát triển xuống đất, chúng có thể tạo thành những “cột rễ” rất đặc biệt, khiến cây trông như có nhiều thân.",
       "funLabel": ""
     }
-  ],
-  "pages": {
-    "about": "<style>* { box-sizing: border-box; } body {margin: 0;}*{box-sizing:border-box;}body{margin-top:0px;margin-right:0px;margin-bottom:0px;margin-left:0px;}.reveal.about-mission{font-size:20px;font-family:\"Comic Sans MS\", cursive, sans-serif;}#iwbf{margin-top:10px;margin-right:0px;margin-bottom:10px;margin-left:0px;}</style>\n<body><div class=\"wrap page\"><h1>Về dự án</h1><p class=\"reveal about-mission\">Dự án do Đỗ Mạnh Khang và Nguyễn Minh Đăng thực hiện<br/>Được phụ trách bởi Ms. Ngọc</p><p id=\"iwbf\">Được làm bằng HTML/CSS/JS, Hosting: GitHub Pages <br/>Library:<b> jsdelivr, CloudFlare, unPkg </b>: GrapesJS, npm/qrcode </p></div></body>"
-  },
-  "font": "\"Be Vietnam Pro\", system-ui, sans-serif"
+  ]
 }
