@@ -1,5 +1,6 @@
 {
   "brand": "GREEN MAP",
+  "font": "\"Be Vietnam Pro\", system-ui, sans-serif",
   "footer": "© 2026 Green Map — THCS Võ Trường Toản",
   "hero": {
     "image": "assets/hero-photo.webp",
@@ -15,6 +16,94 @@
     "Không có QR? Vào Danh sách cây và tìm theo tên."
   ],
   "guideImage": "assets/qr-scan.webp",
+  "map": {
+    "image": "assets/so-do-truong.webp",
+    "spots": [
+      {
+        "slug": "bang-dai-loan",
+        "label": "",
+        "x": 27.38,
+        "y": 93.39,
+        "w": 3.95,
+        "h": 4.66
+      },
+      {
+        "slug": "bang-dai-loan",
+        "label": "",
+        "x": 32.03,
+        "y": 93.39,
+        "w": 3.14,
+        "h": 4.85
+      },
+      {
+        "slug": "bang-dai-loan",
+        "label": "",
+        "x": 36.1,
+        "y": 93.39,
+        "w": 3.72,
+        "h": 4.07
+      },
+      {
+        "slug": "bang-dai-loan",
+        "label": "",
+        "x": 40.76,
+        "y": 93.19,
+        "w": 3.02,
+        "h": 4.46
+      },
+      {
+        "slug": "bang-dai-loan",
+        "label": "",
+        "x": 44.94,
+        "y": 93.19,
+        "w": 4.07,
+        "h": 4.46
+      },
+      {
+        "slug": "diep-vang",
+        "label": "",
+        "x": 66.8,
+        "y": 93.77,
+        "w": 3.26,
+        "h": 4.27
+      },
+      {
+        "slug": "cay-dau",
+        "label": "",
+        "x": 70.52,
+        "y": 93.58,
+        "w": 3.26,
+        "h": 4.46
+      },
+      {
+        "slug": "bang-lang-tim",
+        "label": "",
+        "x": 74.94,
+        "y": 93.19,
+        "w": 3.72,
+        "h": 5.43
+      },
+      {
+        "slug": "mong-bo",
+        "label": "",
+        "x": 79.71,
+        "y": 93.58,
+        "w": 3.37,
+        "h": 4.85
+      },
+      {
+        "slug": "cay-dau",
+        "label": "",
+        "x": 83.2,
+        "y": 94.16,
+        "w": 4.3,
+        "h": 4.27
+      }
+    ]
+  },
+  "pages": {
+    "about": "<style>* { box-sizing: border-box; } body {margin: 0;}*{box-sizing:border-box;}body{margin-top:0px;margin-right:0px;margin-bottom:0px;margin-left:0px;}.reveal.about-mission{font-size:20px;font-family:\"Comic Sans MS\", cursive, sans-serif;}#iwbf{margin-top:10px;margin-right:0px;margin-bottom:10px;margin-left:0px;}</style>\n<body><div class=\"wrap page\"><h1>Về dự án</h1><p class=\"reveal about-mission\">Dự án do Đỗ Mạnh Khang và Nguyễn Minh Đăng thực hiện<br/>Được phụ trách bởi Ms. Ngọc</p><p id=\"iwbf\">Được làm bằng HTML/CSS/JS, Hosting: GitHub Pages <br/>Library:<b> jsdelivr, CloudFlare, unPkg </b>: GrapesJS, npm/qrcode </p></div></body>"
+  },
   "about": "Dự án do Đỗ Mạnh Khang và Nguyễn Minh Đăng thực hiện: khảo sát, chụp ảnh và gắn mã QR lên từng cây, kèm bản đồ trực quan giúp mọi người tra cứu nhanh thông tin loài cây.",
   "trees": [
     {
@@ -210,9 +299,5 @@
       "fun": "Cây si thuộc chi Ficus, nhóm cây nổi tiếng với hệ thống rễ phụ. Khi các rễ này phát triển xuống đất, chúng có thể tạo thành những “cột rễ” rất đặc biệt, khiến cây trông như có nhiều thân.",
       "funLabel": ""
     }
-  ],
-  "pages": {
-    "about": "<style>* { box-sizing: border-box; } body {margin: 0;}*{box-sizing:border-box;}body{margin-top:0px;margin-right:0px;margin-bottom:0px;margin-left:0px;}.reveal.about-mission{font-size:20px;font-family:\"Comic Sans MS\", cursive, sans-serif;}#iwbf{margin-top:10px;margin-right:0px;margin-bottom:10px;margin-left:0px;}</style>\n<body><div class=\"wrap page\"><h1>Về dự án</h1><p class=\"reveal about-mission\">Dự án do Đỗ Mạnh Khang và Nguyễn Minh Đăng thực hiện<br/>Được phụ trách bởi Ms. Ngọc</p><p id=\"iwbf\">Được làm bằng HTML/CSS/JS, Hosting: GitHub Pages <br/>Library:<b> jsdelivr, CloudFlare, unPkg </b>: GrapesJS, npm/qrcode </p></div></body>"
-  },
-  "font": "\"Be Vietnam Pro\", system-ui, sans-serif"
+  ]
 }
