@@ -18,7 +18,8 @@
        #/            Trang chủ            #/cay/<slug>  Chi tiết 1 loài
        #/huong-dan   Hướng dẫn            #/qr          Tạo QR hàng loạt (ẩn)
        #/danh-sach   Danh sách cây        #/aadmin       Bảng quản trị (ẩn)
-       #/du-an       Về dự án
+       #/du-an       Về dự án             #/ban-do      Bản đồ cây (bấm ô → cây)
+                                          #/map-edit    Chỉnh bản đồ (ẩn)
 
      SỬA NỘI DUNG — 2 cách
        A. Vào #/aadmin, sửa bằng form, bấm "Tải data.json",
@@ -292,6 +293,63 @@ footer{background:var(--g900);color:#d9efdd;padding:28px 0;text-align:center;fon
   .bd-side{display:none}
 }
 
+/* ================= BẢN ĐỒ ================= */
+.map-wrap{border:1px solid var(--line);border-radius:var(--radius);overflow:auto;background:var(--paper);
+  box-shadow:0 10px 30px rgba(20,83,45,.08);-webkit-overflow-scrolling:touch}
+.map-stage{position:relative;min-width:720px;user-select:none}
+.map-stage>img{width:100%;display:block;pointer-events:none}
+.spot{position:absolute;border-radius:8px;background:rgba(46,158,79,.22);border:2px solid var(--g500);
+  display:grid;place-items:center;animation:spotPulse 2.4s ease-in-out infinite;
+  transition:background .2s,transform .2s var(--ease),box-shadow .2s}
+.spot::before{content:"🌳";font-size:clamp(12px,1.5vw,20px);filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))}
+.spot:hover,.spot.hl{background:rgba(46,158,79,.45);transform:scale(1.06);z-index:3;
+  box-shadow:0 6px 18px rgba(20,83,45,.3);animation:none}
+.spot-tip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%) translateY(4px);
+  white-space:nowrap;background:var(--g900);color:#fff;font-size:12.5px;font-weight:800;padding:4px 10px;
+  border-radius:999px;opacity:0;pointer-events:none;transition:.2s}
+.spot.below .spot-tip{bottom:auto;top:calc(100% + 6px)}
+.spot:hover .spot-tip,.spot.hl .spot-tip{opacity:1;transform:translateX(-50%)}
+@keyframes spotPulse{0%,100%{box-shadow:0 0 0 0 rgba(46,158,79,.45)}50%{box-shadow:0 0 0 7px rgba(46,158,79,0)}}
+.map-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.map-legend a{background:var(--g100);color:var(--g700);border-radius:999px;padding:7px 14px;
+  font-weight:700;font-size:14px;transition:background .2s}
+.map-legend a:hover{background:#d3ecd8}
+.map-hint{font-size:13px;color:var(--mut);margin-top:8px}
+
+/* -- trình chỉnh bản đồ -- */
+.me{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;align-items:start}
+.me-stage{position:relative;user-select:none;touch-action:none;cursor:crosshair;
+  border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--paper)}
+.me-stage img{width:100%;display:block;pointer-events:none}
+.me-empty{aspect-ratio:16/9;display:grid;place-items:center;color:var(--mut);padding:20px;text-align:center}
+.me-spot{position:absolute;border:2px solid var(--g500);background:rgba(46,158,79,.25);border-radius:6px;cursor:move}
+.me-spot.bad{border-style:dashed;border-color:#c0392b;background:rgba(192,57,43,.18)}
+.me-spot.sel{border-color:#e67e22;border-style:solid;background:rgba(230,126,34,.25);z-index:2}
+.me-lab{position:absolute;left:0;top:100%;margin-top:2px;background:var(--g900);color:#fff;font-size:11px;
+  font-weight:700;padding:1px 7px;border-radius:6px;white-space:nowrap;pointer-events:none}
+.me-spot.bad .me-lab{background:#c0392b}
+.me-spot.sel .me-lab{background:#e67e22}
+.me-h{position:absolute;right:-7px;bottom:-7px;width:14px;height:14px;border-radius:50%;background:#fff;
+  border:2px solid #e67e22;cursor:nwse-resize;display:none}
+.me-spot.sel .me-h{display:block}
+.me-panel{position:sticky;top:90px;border:1px solid var(--line);border-radius:14px;padding:16px;
+  background:#fff;max-height:calc(100vh - 110px);overflow:auto}
+.me-panel h4{font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--g700);margin:16px 0 8px}
+.me-panel h4:first-child{margin-top:0}
+.me-panel select,.me-panel input{width:100%;border:1px solid var(--line);border-radius:10px;
+  padding:9px 11px;font-size:14.5px;background:#fff}
+.me-panel select:focus,.me-panel input:focus{outline:0;border-color:var(--g500)}
+.me-xy{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.me-xy label{font-size:11px;color:var(--mut);font-weight:700}
+.me-xy input{padding:6px 7px;font-size:13px}
+.me-rows{display:flex;flex-direction:column;gap:4px}
+.me-row{text-align:left;border:1px solid var(--line);background:#fff;border-radius:8px;
+  padding:7px 10px;cursor:pointer;font-size:13.5px}
+.me-row:hover{background:var(--paper)}
+.me-row.sel{border-color:#e67e22;background:#fdf2e9}
+.me-row.bad{color:#c0392b}
+@media(max-width:880px){.me{grid-template-columns:1fr}.me-panel{position:static;max-height:none}}
+
 /* ================= MOBILE ================= */
 @media(max-width:880px){
   .menu{display:none;position:absolute;top:72px;left:0;right:0;background:#fff;
@@ -403,6 +461,8 @@ const DATA = {
     "Không có QR? Vào Danh sách cây và tìm theo tên."
   ],
   guideImage: "assets/qr-scan.webp",
+  /* Bản đồ: mỗi ô là % toạ độ trên ảnh sơ đồ, gắn với slug cây. Chỉnh bằng #/map-edit */
+  map: { image:"assets/so-do-truong.webp", spots:[] },
   /* Nội dung 3 trang tĩnh dưới dạng HTML thô — chỉnh bằng công cụ kéo-thả ở #/aadmin.
      Nếu để trống, site tự dựng từ hero/guide/about như bản cũ (fallback). */
   pages: { home:"", guide:"", about:"" },
@@ -728,12 +788,62 @@ async function openScanner(){
                   + '<a href="#/danh-sach" onclick="closeScanner()">Xem danh sách cây →</a>';
   }
 }
-function onScanned(text){
-  const m = String(text).match(/#\/cay\/([a-z0-9-]+)/i);
-  if(m && idxOf(m[1]) > -1){ closeScanner(); location.hash = "#/cay/" + m[1]; return; }
-  $("#scanMsg").innerHTML = /^https?:\/\//i.test(text)
-    ? `Mã này không thuộc Green Map: <a href="${esc(text)}" target="_blank" rel="noopener">${esc(text)}</a>`
-    : `Nội dung mã: <b>${esc(String(text).slice(0,120))}</b>`;
+/* Tên miền coi như "của Green Map":
+   - INTERNAL: link trực tiếp tới site (có #/cay/<slug>)
+   - DYNAMIC : dịch vụ QR động — /t01, /bang-dai-loan, /?c=t01 */
+const QR_INTERNAL_HOSTS = ["ctl4100wl.github.io", "greenmap.asusmine1309.workers.dev"];
+const QR_DYNAMIC_HOSTS  = ["dynamicqr.decorfuns.com"];
+let scanBusy = false;
+
+function goTree(slug){ closeScanner(); location.hash = "#/cay/" + slug; }
+function treeSlugIn(str){
+  const m = String(str || "").match(/#\/cay\/([a-z0-9-]+)/i);
+  const s = m ? m[1].toLowerCase() : "";
+  return s && idxOf(s) > -1 ? s : "";
+}
+
+async function onScanned(text){
+  if(scanBusy) return;
+  const raw = String(text).trim();
+
+  /* 1. link bất kỳ có #/cay/<slug> (github, mirror…) → mở thẳng */
+  const direct = treeSlugIn(raw);
+  if(direct) return goTree(direct);
+
+  let u = null;
+  try{ u = new URL(/^[a-z]+:\/\//i.test(raw) ? raw : "https://" + raw); }catch(e){}
+  const host = u ? u.hostname.toLowerCase() : "";
+
+  /* 2. mã QR động */
+  if(u && QR_DYNAMIC_HOSTS.includes(host)){
+    const code = (u.searchParams.get("c") || u.pathname.split("/").filter(Boolean).pop() || "")
+                   .toLowerCase().replace(/[^a-z0-9-]/g, "");
+    if(code && idxOf(code) > -1) return goTree(code);      // mã đặt theo slug cây
+
+    scanBusy = true;
+    $("#scanMsg").textContent = "Đang mở…";
+    try{
+      /* hỏi server QR động đích thật là gì (cần index.php bản có ?json=1) */
+      const r = await fetch(u.origin + "/?c=" + encodeURIComponent(code) + "&json=1", { cache:"no-store" });
+      const j = await r.json();
+      const s = treeSlugIn(j.target);
+      if(s){ scanBusy = false; return goTree(s); }
+      if(j.target){ closeScanner(); scanBusy = false; location.href = j.target; return; }
+    }catch(e){}
+    scanBusy = false;
+    closeScanner(); location.href = u.href;                  // vẫn mở luôn, server tự chuyển hướng
+    return;
+  }
+
+  /* 3. link site mình nhưng không trỏ cây cụ thể */
+  if(u && (QR_INTERNAL_HOSTS.includes(host) || host === location.hostname)){
+    closeScanner(); location.href = u.href; return;
+  }
+
+  /* 4. mã lạ */
+  $("#scanMsg").innerHTML = u
+    ? `Mã này không thuộc Green Map: <a href="${esc(u.href)}" target="_blank" rel="noopener">${esc(u.href)}</a>`
+    : `Nội dung mã: <b>${esc(raw.slice(0,120))}</b>`;
 }
 function closeScanner(){
   $("#scan").classList.remove("on");
@@ -931,7 +1041,11 @@ function setField(path, value){
   let o = DRAFT;
   for(let i=0;i<parts.length-1;i++) o = o[parts[i]];
   const last = parts[parts.length-1];
+  const old = o[last];
   o[last] = (last === "guide") ? value.split("\n").map(s=>s.trim()).filter(Boolean) : value;
+  /* đổi slug cây → các ô bản đồ đang trỏ slug cũ đi theo */
+  if(parts[0] === "trees" && last === "slug" && DRAFT.map && DRAFT.map.spots)
+    DRAFT.map.spots.forEach(sp => { if(sp.slug === old) sp.slug = value; });
   lsSet(JSON.stringify(DRAFT));
 }
 
@@ -964,6 +1078,7 @@ function aadminPage(){
       <button class="btn" onclick="aadminExport()">⬇️ Tải data.json</button>
       <button class="btn ghost" onclick="aadminApply()">👁️ Xem thử trên site</button>
       <button class="btn ghost" onclick="aadminReset()">↩️ Về bản gốc</button>
+      <a class="btn ghost" href="#/map-edit">🗺️ Bản đồ</a>
       <a class="btn ghost" href="#/assets">🖼️ Quản lý ảnh</a>
       <a class="btn ghost" href="#/qr">🔳 Trang QR</a>
     </div>
@@ -1042,6 +1157,15 @@ function aadminPage(){
       </div>
     </details>
 
+    <details class="acc">
+      <summary>🗺️ Bản đồ cây <span class="tag">${((DRAFT.map||{}).spots||[]).length} ô</span></summary>
+      <div class="body">
+        <p class="hint" style="margin-bottom:12px">Vẽ ô trên sơ đồ trường và gắn mỗi ô với một cây trong danh sách.
+          Khách bấm vào ô sẽ mở trang cây đó.</p>
+        <a class="btn ghost sm" href="#/map-edit">🗺️ Mở trình chỉnh bản đồ</a>
+      </div>
+    </details>
+
     <h3>🌳 Danh sách cây (${DRAFT.trees.length})</h3>
     <div id="treeEditor">${DRAFT.trees.map(treeEditor).join("")}</div>
     <button class="btn ghost" onclick="addTree()">＋ Thêm cây mới</button>
@@ -1097,6 +1221,7 @@ function allImageRefs(){
   const list = [];
   if(DRAFT.hero.image) list.push({ label:"Hero — ảnh nền", path:"hero.image", src:DRAFT.hero.image });
   if(DRAFT.guideImage) list.push({ label:"Hướng dẫn — ảnh minh hoạ", path:"guideImage", src:DRAFT.guideImage });
+  if(DRAFT.map && DRAFT.map.image) list.push({ label:"Bản đồ — ảnh sơ đồ", path:"map.image", src:DRAFT.map.image });
   DRAFT.trees.forEach((t,i) => (t.imgs||[]).forEach((src,k) =>
     list.push({ label:`${t.name||"(chưa đặt tên)"} — ảnh ${k+1}`, path:`trees.${i}.imgs.${k}`, src })));
   return list;
@@ -1243,6 +1368,217 @@ function aadminReset(){
   paintShell(); router(); toast("Đã khôi phục bản gốc");
 }
 
+/* ================= BẢN ĐỒ CÂY — trang công khai ================= */
+const treeBySlug = slug => CONFIG.trees.find(t => t.slug === slug);
+
+function mapPage(){
+  const m = CONFIG.map || {};
+  const spots = (m.spots || []).map((sp,i) => ({ ...sp, i, t: treeBySlug(sp.slug) })).filter(sp => sp.t);
+  if(!m.image) return H.page("Bản đồ cây xanh", "", `<p class="map-hint">Chưa có sơ đồ.</p>`);
+  const name = sp => esc(sp.label || sp.t.name);
+  return H.page("Bản đồ cây xanh", "Bấm vào ô 🌳 trên sơ đồ để xem thông tin cây.", `
+    <div class="map-wrap"><div class="map-stage">
+      <img src="${esc(m.image)}" alt="Sơ đồ trường" onerror="mapImgFail(this)">
+      ${spots.map(sp => `<a class="spot ${sp.y < 8 ? "below" : ""}" data-i="${sp.i}" href="#/cay/${sp.slug}"
+          aria-label="${name(sp)}" style="left:${sp.x}%;top:${sp.y}%;width:${sp.w}%;height:${sp.h}%">
+          <span class="spot-tip">${name(sp)}</span></a>`).join("")}
+    </div></div>
+    <div class="map-hint">Trên điện thoại: vuốt ngang để xem toàn bộ sơ đồ.</div>
+    ${spots.length ? `<div class="map-legend">${spots.map(sp =>
+      `<a href="#/cay/${sp.slug}" onmouseenter="mapHL(${sp.i},1)" onmouseleave="mapHL(${sp.i},0)">🌳 ${name(sp)}</a>`
+    ).join("")}</div>` : ""}`);
+}
+function mapHL(i, on){ const el = document.querySelector(`.spot[data-i="${i}"]`); if(el) el.classList.toggle("hl", !!on); }
+function mapImgFail(img){
+  const w = img.closest(".map-wrap");
+  if(w) w.outerHTML = '<p class="map-hint">⚠ Không tải được ảnh sơ đồ — kiểm tra tên file trong assets/.</p>';
+}
+
+/* ================= BẢN ĐỒ CÂY — trình chỉnh (admin) ================= */
+let MAPSEL = -1, MAPDRAG = null;
+const meSpots = () => DRAFT.map.spots;
+const meClamp = (v, a = 0, b = 100) => Math.min(b, Math.max(a, v));
+const meR = v => Math.round(v * 100) / 100;
+const meSave = () => lsSet(JSON.stringify(DRAFT));
+const meTree = slug => DRAFT.trees.find(t => t.slug === slug);
+
+function ensureMapDraft(){
+  DRAFT = DRAFT || JSON.parse(JSON.stringify(CONFIG));
+  if(!DRAFT.map) DRAFT.map = JSON.parse(JSON.stringify(CONFIG.map || DATA.map));
+  DRAFT.map.spots = DRAFT.map.spots || [];
+}
+
+function mapEditPage(){
+  ensureMapDraft();
+  MAPSEL = -1; MAPDRAG = null;
+  return `
+  <div class="wrap page">
+    <h1>Chỉnh bản đồ cây</h1>
+    <div class="sub">Kéo chuột trên sơ đồ để vẽ ô → chọn cây cho ô đó. Kéo ô để di chuyển, kéo chấm cam ở góc để đổi cỡ.</div>
+    <div class="adm-bar noprint">
+      <button class="btn" onclick="aadminExport()">⬇️ Tải data.json</button>
+      <button class="btn ghost" onclick="mePreview()">👁️ Xem thử</button>
+      <a class="btn ghost" href="#/aadmin">⚙️ Bảng quản trị</a>
+    </div>
+    <div class="me">
+      <div>
+        <div class="me-stage" id="meStage">${meStageInner()}</div>
+        <div class="map-hint">Phím tắt: Delete xoá ô đang chọn · ← → ↑ ↓ di chuyển (giữ Shift = nhanh) · Esc bỏ chọn</div>
+      </div>
+      <aside class="me-panel" id="mePanel"></aside>
+    </div>
+  </div>`;
+}
+
+function meStageInner(){
+  const src = DRAFT.map.image;
+  return src
+    ? `<img src="${esc(src)}" alt="" draggable="false" onerror="meImgFail()"><div id="meLayer" style="position:absolute;inset:0"></div>`
+    : `<div class="me-empty">Chưa có ảnh sơ đồ — nhập đường dẫn ảnh ở khung bên phải.</div>`;
+}
+function meImgFail(){
+  $("#meStage").innerHTML = `<div class="me-empty">⚠ Không tải được ảnh: ${esc(DRAFT.map.image)}<br>Kiểm tra lại tên file trong assets/.</div>`;
+}
+
+function meRenderSpots(){
+  const L = $("#meLayer"); if(!L) return;
+  L.innerHTML = meSpots().map((sp,i) => {
+    const t = meTree(sp.slug);
+    const nm = sp.label || (t ? t.name : "Chưa gán cây");
+    return `<div class="me-spot ${i===MAPSEL?"sel":""} ${t?"":"bad"}" data-i="${i}"
+      style="left:${sp.x}%;top:${sp.y}%;width:${sp.w}%;height:${sp.h}%">
+      <span class="me-lab">${i+1}. ${esc(nm)}</span><i class="me-h" data-h="1"></i></div>`;
+  }).join("");
+}
+
+function meRenderPanel(){
+  const P = $("#mePanel"); if(!P) return;
+  const spots = meSpots(), sp = spots[MAPSEL];
+  const opts = cur => `<option value="">— Chọn cây —</option>` + DRAFT.trees.map(t =>
+    `<option value="${esc(t.slug)}" ${t.slug===cur?"selected":""}>${esc(t.name)}</option>`).join("");
+  const num = (k, lab) => `<div><label>${lab}</label>
+    <input type="number" step="0.1" value="${sp[k]}" onchange="meSetNum('${k}',this.value)"></div>`;
+
+  P.innerHTML = `
+    <h4>Ảnh sơ đồ</h4>
+    <input value="${esc(DRAFT.map.image||"")}" placeholder="assets/so-do-truong.webp" onchange="meSetImage(this.value)">
+    ${sp ? `
+      <h4>Ô #${MAPSEL+1}</h4>
+      <select onchange="meSet('slug',this.value)">${opts(sp.slug)}</select>
+      ${sp.slug && !meTree(sp.slug) ? `<div class="imgstatus bad">⚠ Cây “${esc(sp.slug)}” không còn trong danh sách</div>` : ""}
+      <input style="margin-top:8px" value="${esc(sp.label||"")}" placeholder="Nhãn hiển thị (trống = tên cây)"
+             oninput="meSet('label',this.value,true)">
+      <div class="me-xy" style="margin-top:10px">${num("x","X %")}${num("y","Y %")}${num("w","Rộng %")}${num("h","Cao %")}</div>
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+        <button class="btn ghost sm" onclick="meDup()">Nhân bản</button>
+        <button class="btn ghost sm" style="color:#c0392b;border-color:#e3a39b" onclick="meDel()">Xoá ô</button>
+      </div>` : `<p class="hint" style="margin-top:12px">Kéo trên sơ đồ để vẽ ô mới, hoặc bấm một ô để chỉnh.</p>`}
+    <h4>Tất cả ô (${spots.length})</h4>
+    <div class="me-rows">${spots.map((s2,i) => { const t = meTree(s2.slug);
+      return `<button class="me-row ${i===MAPSEL?"sel":""} ${t?"":"bad"}" onclick="meSelect(${i})">${i+1}. ${
+        esc(s2.label || (t ? t.name : "⚠ chưa gán cây"))}</button>`; }).join("")
+      || '<span class="hint">Chưa có ô nào.</span>'}</div>`;
+}
+
+function meSelect(i){ MAPSEL = i; meRenderSpots(); meRenderPanel(); }
+function meSet(k, v, quiet){
+  const sp = meSpots()[MAPSEL]; if(!sp) return;
+  sp[k] = v; meSave(); meRenderSpots(); if(!quiet) meRenderPanel();
+}
+function meSetNum(k, v){
+  const sp = meSpots()[MAPSEL]; v = parseFloat(v); if(!sp || isNaN(v)) return;
+  if(k === "x") sp.x = meR(meClamp(v, 0, 100 - sp.w));
+  if(k === "y") sp.y = meR(meClamp(v, 0, 100 - sp.h));
+  if(k === "w") sp.w = meR(meClamp(v, 0.5, 100 - sp.x));
+  if(k === "h") sp.h = meR(meClamp(v, 0.5, 100 - sp.y));
+  meSave(); meRenderSpots(); meRenderPanel();
+}
+function meSetImage(v){
+  DRAFT.map.image = v.trim(); meSave();
+  $("#meStage").innerHTML = meStageInner(); meRenderSpots(); meRenderPanel();
+}
+function meDel(){
+  if(MAPSEL < 0) return;
+  meSpots().splice(MAPSEL, 1); MAPSEL = -1; meSave(); meRenderSpots(); meRenderPanel();
+}
+function meDup(){
+  const sp = meSpots()[MAPSEL]; if(!sp) return;
+  meSpots().push({ ...sp, x: meR(meClamp(sp.x + 2, 0, 100 - sp.w)), y: meR(meClamp(sp.y + 2, 0, 100 - sp.h)) });
+  MAPSEL = meSpots().length - 1; meSave(); meRenderSpots(); meRenderPanel();
+}
+function mePreview(){
+  CONFIG = JSON.parse(JSON.stringify(DRAFT));
+  applySiteFont(); paintShell(); location.hash = "#/ban-do";
+  toast("Đang xem thử bản nháp");
+}
+
+function mePct(e){
+  const r = $("#meLayer").getBoundingClientRect();
+  return { x: meClamp((e.clientX - r.left) / r.width * 100), y: meClamp((e.clientY - r.top) / r.height * 100) };
+}
+
+function mapEditAfter(){
+  meRenderSpots(); meRenderPanel();
+  const st = $("#meStage"); if(!st) return;
+
+  st.onpointerdown = e => {
+    if(e.button !== 0 || !$("#meLayer")) return;
+    const p = mePct(e), el = e.target.closest(".me-spot"), spots = meSpots();
+    if(el){
+      const i = +el.dataset.i; MAPSEL = i;
+      MAPDRAG = { mode: e.target.dataset.h ? "resize" : "move", i, start: p, orig: { ...spots[i] } };
+    }else{
+      spots.push({ slug:"", label:"", x:p.x, y:p.y, w:0, h:0 });
+      MAPSEL = spots.length - 1;
+      MAPDRAG = { mode:"draw", i: MAPSEL, start: p };
+    }
+    st.setPointerCapture(e.pointerId);
+    meRenderSpots(); meRenderPanel(); e.preventDefault();
+  };
+
+  st.onpointermove = e => {
+    if(!MAPDRAG) return;
+    const p = mePct(e), sp = meSpots()[MAPDRAG.i], a = MAPDRAG.start, o = MAPDRAG.orig;
+    if(MAPDRAG.mode === "draw"){
+      sp.x = Math.min(a.x, p.x); sp.y = Math.min(a.y, p.y);
+      sp.w = Math.abs(p.x - a.x); sp.h = Math.abs(p.y - a.y);
+    }else if(MAPDRAG.mode === "move"){
+      sp.x = meClamp(o.x + p.x - a.x, 0, 100 - sp.w);
+      sp.y = meClamp(o.y + p.y - a.y, 0, 100 - sp.h);
+    }else{
+      sp.w = meClamp(o.w + p.x - a.x, 0.8, 100 - sp.x);
+      sp.h = meClamp(o.h + p.y - a.y, 0.8, 100 - sp.y);
+    }
+    meRenderSpots();
+  };
+
+  st.onpointerup = st.onpointercancel = () => {
+    if(!MAPDRAG) return;
+    const sp = meSpots()[MAPDRAG.i];
+    if(MAPDRAG.mode === "draw" && (sp.w < 1.2 || sp.h < 1.2)){   // chỉ bấm, không kéo → ô mặc định 4×5%
+      sp.w = 4; sp.h = 5;
+      sp.x = meClamp(sp.x - 2, 0, 96); sp.y = meClamp(sp.y - 2.5, 0, 95);
+    }
+    ["x","y","w","h"].forEach(k => sp[k] = meR(sp[k]));
+    MAPDRAG = null; meSave(); meRenderSpots(); meRenderPanel();
+  };
+}
+
+addEventListener("keydown", e => {
+  if(location.hash !== "#/map-edit") return;
+  if(/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
+  if(e.key === "Escape"){ MAPSEL = -1; meRenderSpots(); meRenderPanel(); return; }
+  const sp = meSpots()[MAPSEL]; if(!sp) return;
+  if(e.key === "Delete" || e.key === "Backspace"){ meDel(); e.preventDefault(); return; }
+  const d = e.shiftKey ? 1 : 0.2;
+  const mv = { ArrowLeft:[-d,0], ArrowRight:[d,0], ArrowUp:[0,-d], ArrowDown:[0,d] }[e.key];
+  if(mv){
+    sp.x = meR(meClamp(sp.x + mv[0], 0, 100 - sp.w));
+    sp.y = meR(meClamp(sp.y + mv[1], 0, 100 - sp.h));
+    meSave(); meRenderSpots(); meRenderPanel(); e.preventDefault();
+  }
+});
+
 /* ================= ROUTES ================= */
 const PAGES = {
   "/": {
@@ -1299,6 +1635,8 @@ const PAGES = {
     }
   },
 
+  "/ban-do": { label:"Bản đồ", title:"Bản đồ — Green Map", inMenu:true, render: mapPage },
+
   "/du-an": {
     label:"Về dự án", title:"Về dự án — Green Map", inMenu:true,
     defaultHTML(){
@@ -1328,6 +1666,8 @@ const PAGES = {
 
   "/aadmin": { label:"aadmin", title:"Quản trị — Green Map", inMenu:false, render: aadminPage,
               after: refreshHeroChecks },
+  "/map-edit": { label:"Bản đồ", title:"Chỉnh bản đồ — Green Map", inMenu:false,
+                 render: mapEditPage, after: mapEditAfter },
   "/assets": { label:"Ảnh", title:"Quản lý ảnh — Green Map", inMenu:false, render: assetsPage,
                after: checkAllImgs }
 };
